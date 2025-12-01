@@ -1,13 +1,11 @@
-﻿using GrobelnyKasprzak.MovieCatalogue.Entity;
-
-namespace GrobelnyKasprzak.MovieCatalogue.Interfaces
+﻿namespace GrobelnyKasprzak.MovieCatalogue.Interfaces
 {
     public interface IStudioRepository
     {
-        IEnumerable<Studio> GetAll();
-        Studio? GetById(int id);
-        void Add(Studio studio);
-        void Update(Studio studio);
+        IEnumerable<IStudio> GetAll();
+        IStudio? GetById(int id);
+        void Add(IStudio studio);
+        void Update(IStudio studio);
         void Delete(int id);
     }
 }

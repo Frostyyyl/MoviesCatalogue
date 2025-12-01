@@ -1,61 +1,58 @@
-﻿using GrobelnyKasprzak.MovieCatalogue.Entity;
+﻿using GrobelnyKasprzak.MovieCatalogue.Core;
+using GrobelnyKasprzak.MovieCatalogue.DAOMock.Models;
 using GrobelnyKasprzak.MovieCatalogue.Interfaces;
-using System.Xml.Linq;
 
 namespace GrobelnyKasprzak.MovieCatalogue.DAOMock
 {
     public class MovieRepositoryMock : IMovieRepository
     {
-        private static List<Movie> _movies = new List<Movie>()
-        {
+        private static List<Movie> _movies =
+        [
             new Movie { Id = 1, Title = "Matrix", Year = 1999, StudioId = 1, Genre = MovieGenre.SciFi, DirectorId = 1 },
             new Movie { Id = 2, Title = "Shrek", Year = 2001, StudioId = 2, Genre = MovieGenre.Animation, DirectorId = 2 }
-        };
+        ];
 
         private static int _nextId = 3;
 
-        public IEnumerable<Movie> GetAll()
+        private readonly IStudioRepository _studioRepo;
+        private readonly IDirectorRepository _directorRepo;
+
+        public MovieRepositoryMock(IStudioRepository studioRepo, IDirectorRepository directorRepo)
         {
-            var studioRepo = new StudioRepositoryMock();
-            var directorRepo = new DirectorRepositoryMock();
-
-            foreach (var movie in _movies)
-            {
-                if (movie.StudioId > 0)
-                    movie.Studio = studioRepo.GetById(movie.StudioId);
-
-                if (movie.DirectorId > 0)
-                    movie.Director = directorRepo.GetById(movie.DirectorId);
-            }
-
-            return _movies;
+            _studioRepo = studioRepo;
+            _directorRepo = directorRepo;
         }
 
-        public Movie? GetById(int id)
+        public IEnumerable<IMovie> GetAll()
+        {
+            return LoadNavigationProperties(_movies);
+        }
+
+        public IMovie? GetById(int id)
         {
             var movie = _movies.FirstOrDefault(m => m.Id == id);
 
             if (movie != null)
             {
-                var studioRepo = new StudioRepositoryMock();
-                var directorRepo = new DirectorRepositoryMock();
-
-                movie.Studio = studioRepo.GetById(movie.StudioId);
-                movie.Director = directorRepo.GetById(movie.DirectorId);
+                return LoadNavigationProperties(movie);
             }
 
-            return movie;
+            return null;
         }
 
-        public void Add(Movie movie)
+        public void Add(IMovie movie)
         {
-            movie.Id = _nextId++;
-            _movies.Add(movie);
+            if (movie is Movie concreteMovie)
+            {
+                concreteMovie.Id = _nextId++;
+                _movies.Add(concreteMovie);
+            }
         }
 
-        public void Update(Movie movie)
+        public void Update(IMovie movie)
         {
             var existing = _movies.FirstOrDefault(m => m.Id == movie.Id);
+
             if (existing != null)
             {
                 existing.Title = movie.Title;
@@ -64,21 +61,38 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAOMock
                 existing.StudioId = movie.StudioId;
                 existing.DirectorId = movie.DirectorId;
 
-                var studioRepo = new StudioRepositoryMock();
-                existing.Studio = studioRepo.GetById(movie.StudioId);
-
-                var directorRepo = new DirectorRepositoryMock();
-                existing.Director = directorRepo.GetById(movie.DirectorId);
+                existing.Studio = (Studio?)_studioRepo.GetById(movie.StudioId);
+                existing.Director = (Director?)_directorRepo.GetById(movie.DirectorId);
             }
         }
 
         public void Delete(int id)
         {
             var movie = _movies.FirstOrDefault(m => m.Id == id);
+
             if (movie != null)
             {
                 _movies.Remove(movie);
             }
+        }
+
+        private IEnumerable<Movie> LoadNavigationProperties(IEnumerable<Movie> movies)
+        {
+            foreach (var movie in movies)
+            {
+                movie.Studio = (Studio?)_studioRepo.GetById(movie.StudioId);
+                movie.Director = (Director?)_directorRepo.GetById(movie.DirectorId);
+            }
+
+            return movies;
+        }
+
+        private Movie LoadNavigationProperties(Movie movie)
+        {
+            movie.Studio = (Studio?)_studioRepo.GetById(movie.StudioId);
+            movie.Director = (Director?)_directorRepo.GetById(movie.DirectorId);
+
+            return movie;
         }
     }
 }

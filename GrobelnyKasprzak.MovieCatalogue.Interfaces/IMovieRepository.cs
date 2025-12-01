@@ -1,13 +1,11 @@
-﻿using GrobelnyKasprzak.MovieCatalogue.Entity;
-
-namespace GrobelnyKasprzak.MovieCatalogue.Interfaces
+﻿namespace GrobelnyKasprzak.MovieCatalogue.Interfaces
 {
     public interface IMovieRepository
     {
-        IEnumerable<Movie> GetAll();
-        Movie? GetById(int id);
-        void Add(Movie movie);
-        void Update(Movie movie);
+        IEnumerable<IMovie> GetAll();
+        IMovie? GetById(int id);
+        void Add(IMovie movie);
+        void Update(IMovie movie);
         void Delete(int id);
     }
 }

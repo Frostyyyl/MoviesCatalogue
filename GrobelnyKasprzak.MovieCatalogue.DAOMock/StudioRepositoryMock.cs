@@ -1,50 +1,55 @@
-﻿using GrobelnyKasprzak.MovieCatalogue.Entity;
+﻿using GrobelnyKasprzak.MovieCatalogue.DAOMock.Models;
 using GrobelnyKasprzak.MovieCatalogue.Interfaces;
+
 namespace GrobelnyKasprzak.MovieCatalogue.DAOMock
 {
     public class StudioRepositoryMock : IStudioRepository
     {
-        private static List<Studio> _studios = new List<Studio>()
-        {
+        private static readonly List<Studio> _studios =
+        [
             new Studio { Id = 1, Name = "Warner Bros" },
             new Studio { Id = 2, Name = "DreamWorks" },
             new Studio { Id = 3, Name = "Universal Pictures" },
             new Studio { Id = 4, Name = "Paramount Pictures" }
-        };
+        ];
 
         private static int _nextId = 5;
 
-        public IEnumerable<Studio> GetAll()
+        public IEnumerable<IStudio> GetAll()
         {
             return _studios;
         }
 
-        public Studio? GetById(int id)
+        public IStudio? GetById(int id)
         {
             return _studios.FirstOrDefault(s => s.Id == id);
         }
 
-        public void Add(Studio studio)
+        public void Add(IStudio studio)
         {
-            studio.Id = _nextId++;
-            if (studio.Movies == null) studio.Movies = new List<Movie>();
-            _studios.Add(studio);
+            if (studio is Studio concreteStudio)
+            {
+                concreteStudio.Id = _nextId++;
+                _studios.Add(concreteStudio);
+            }
         }
 
-        public void Update(Studio studio)
+        public void Update(IStudio studio)
         {
             var existing = GetById(studio.Id);
-            if (existing != null)
+
+            if (existing is Studio existingStudio)
             {
-                existing.Name = studio.Name;
+                existingStudio.Name = studio.Name;
             }
         }
         public void Delete(int id)
         {
             var studio = GetById(id);
-            if (studio != null)
+
+            if (studio is Studio concreteStudio)
             {
-                _studios.Remove(studio);
+                _studios.Remove(concreteStudio);
             }
         }
     }

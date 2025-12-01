@@ -1,10 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GrobelnyKasprzak.MovieCatalogue.Services
 {
@@ -19,7 +14,7 @@ namespace GrobelnyKasprzak.MovieCatalogue.Services
 
             IConfiguration config = builder.Build();
 
-            string dllName = config["AppSettings:DaoLibrary"];
+            string? dllName = config["AppSettings:DaoLibrary"];
 
             if (string.IsNullOrEmpty(dllName))
             {
@@ -41,7 +36,7 @@ namespace GrobelnyKasprzak.MovieCatalogue.Services
 
         public T GetRepository<T>() where T : class
         {
-            Type typeToCreate = null;
+            Type? typeToCreate = null;
 
             foreach (var t in _daoAssembly.GetTypes())
             {
@@ -59,7 +54,7 @@ namespace GrobelnyKasprzak.MovieCatalogue.Services
 
             var instance = Activator.CreateInstance(typeToCreate);
 
-            return (T)instance;
+            return instance == null ? throw new Exception($"Nie znaleziono implementacji {typeof(T).Name} w bibliotece.") : (T)instance;
         }
     }
 }

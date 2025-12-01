@@ -1,5 +1,4 @@
-﻿using GrobelnyKasprzak.MovieCatalogue.Entity;
-using GrobelnyKasprzak.MovieCatalogue.Interfaces;
+﻿using GrobelnyKasprzak.MovieCatalogue.Interfaces;
 
 namespace GrobelnyKasprzak.MovieCatalogue.Services
 {
@@ -12,13 +11,13 @@ namespace GrobelnyKasprzak.MovieCatalogue.Services
             _repo = repo;
         }
 
-        public IEnumerable<Studio> GetAllStudios() => _repo.GetAll();
+        public IEnumerable<IStudio> GetAllStudios() => _repo.GetAll();
 
-        public Studio? GetStudioById(int id) => _repo.GetById(id);
+        public IStudio? GetStudioById(int id) => _repo.GetById(id);
 
-        public void AddStudio(Studio studio) => _repo.Add(studio);
+        public void AddStudio(IStudio studio) => _repo.Add(studio);
 
-        public void UpdateStudio(Studio studio) => _repo.Update(studio);
+        public void UpdateStudio(IStudio studio) => _repo.Update(studio);
 
         public void DeleteStudio(int id) => _repo.Delete(id);
     }

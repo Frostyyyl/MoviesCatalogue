@@ -1,13 +1,11 @@
-﻿using GrobelnyKasprzak.MovieCatalogue.Entity;
-
-namespace GrobelnyKasprzak.MovieCatalogue.Interfaces
+﻿namespace GrobelnyKasprzak.MovieCatalogue.Interfaces
 {
     public interface IDirectorRepository
     {
-        IEnumerable<Director> GetAll();
-        Director? GetById(int id);
-        void Add(Director director);
-        void Update(Director director);
+        IEnumerable<IDirector> GetAll();
+        IDirector? GetById(int id);
+        void Add(IDirector director);
+        void Update(IDirector director);
         void Delete(int id);
     }
 }

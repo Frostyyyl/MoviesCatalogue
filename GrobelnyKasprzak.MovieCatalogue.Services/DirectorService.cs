@@ -1,5 +1,4 @@
-﻿using GrobelnyKasprzak.MovieCatalogue.Entity;
-using GrobelnyKasprzak.MovieCatalogue.Interfaces;
+﻿using GrobelnyKasprzak.MovieCatalogue.Interfaces;
 
 namespace GrobelnyKasprzak.MovieCatalogue.Services
 {
@@ -12,13 +11,13 @@ namespace GrobelnyKasprzak.MovieCatalogue.Services
             _repo = repo;
         }
 
-        public IEnumerable<Director> GetAllDirectors() => _repo.GetAll();
+        public IEnumerable<IDirector> GetAllDirectors() => _repo.GetAll();
 
-        public Director? GetDirectorById(int id) => _repo.GetById(id);
+        public IDirector? GetDirectorById(int id) => _repo.GetById(id);
 
-        public void AddDirector(Director director) => _repo.Add(director);
+        public void AddDirector(IDirector director) => _repo.Add(director);
 
-        public void UpdateDirector(Director director) => _repo.Update(director);
+        public void UpdateDirector(IDirector director) => _repo.Update(director);
 
         public void DeleteDirector(int id) => _repo.Delete(id);
     }
