@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GrobelnyKasprzak.MoviCatalogue.Core\GrobelnyKasprzak.MovieCatalogue.Core.csproj" />
+    <ProjectReference Include="..\GrobelnyKasprzak.MovieCatalogue.Core\GrobelnyKasprzak.MovieCatalogue.Core.csproj" />
   </ItemGroup>
 
 </Project>

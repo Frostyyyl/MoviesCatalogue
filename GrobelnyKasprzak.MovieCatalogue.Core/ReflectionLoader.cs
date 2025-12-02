@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System.Reflection;
 
-namespace GrobelnyKasprzak.MovieCatalogue.Services
+namespace GrobelnyKasprzak.MovieCatalogue.Core
 {
     public class ReflectionLoader
     {
