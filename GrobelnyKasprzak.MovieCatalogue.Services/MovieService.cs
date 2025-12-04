@@ -9,9 +9,7 @@ namespace GrobelnyKasprzak.MovieCatalogue.Services
         public MovieService()
         {
             ReflectionLoader loader = new();
-            IStudioRepository studios = loader.GetRepository<IStudioRepository>();
-            IDirectorRepository directors = loader.GetRepository<IDirectorRepository>();
-            _repo = loader.GetRepository<IMovieRepository>(studios, directors);
+            _repo = loader.GetRepository<IMovieRepository>();
         }
 
         public IEnumerable<IMovie> GetAllMovies() => _repo.GetAll();

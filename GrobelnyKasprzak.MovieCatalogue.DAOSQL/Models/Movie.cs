@@ -19,10 +19,10 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAOSql.Models
         [Range(1, int.MaxValue, ErrorMessage = "Please select a Studio")]
         public int StudioId { get; set; }
         [ForeignKey("StudioId")]
-        public IStudio? Studio { get; set; }
+        public Studio? Studio { get; set; }
         [Range(1, int.MaxValue, ErrorMessage = "Please select a Director")]
         public int DirectorId { get; set; }
         [ForeignKey("DirectorId")]
-        public IDirector? Director { get; set; }
+        public Director? Director { get; set; }
     }
 }

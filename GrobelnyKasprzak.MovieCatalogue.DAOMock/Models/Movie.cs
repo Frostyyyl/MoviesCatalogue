@@ -1,7 +1,6 @@
 ﻿using GrobelnyKasprzak.MovieCatalogue.Core;
 using GrobelnyKasprzak.MovieCatalogue.Interfaces;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GrobelnyKasprzak.MovieCatalogue.DAOMock.Models
 {
@@ -18,11 +17,7 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAOMock.Models
         public MovieGenre Genre { get; set; }
         [Range(1, int.MaxValue, ErrorMessage = "Please select a Studio")]
         public int StudioId { get; set; }
-        [ForeignKey("StudioId")]
-        public IStudio? Studio { get; set; }
         [Range(1, int.MaxValue, ErrorMessage = "Please select a Director")]
         public int DirectorId { get; set; }
-        [ForeignKey("DirectorId")]
-        public IDirector? Director { get; set; }
     }
 }

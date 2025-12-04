@@ -14,18 +14,9 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAOMock
 
         private static int _nextId = 3;
 
-        private readonly IStudioRepository _studioRepo;
-        private readonly IDirectorRepository _directorRepo;
-
-        public MovieRepositoryMock(IStudioRepository studioRepo, IDirectorRepository directorRepo)
-        {
-            _studioRepo = studioRepo;
-            _directorRepo = directorRepo;
-        }
-
         public IEnumerable<IMovie> GetAll()
         {
-            return LoadNavigationProperties(_movies);
+            return _movies;
         }
 
         public IMovie? GetById(int id)
@@ -34,7 +25,7 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAOMock
 
             if (movie != null)
             {
-                return LoadNavigationProperties(movie);
+                return movie;
             }
 
             return null;
@@ -60,9 +51,6 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAOMock
                 existing.Genre = movie.Genre;
                 existing.StudioId = movie.StudioId;
                 existing.DirectorId = movie.DirectorId;
-
-                existing.Studio = (Studio?)_studioRepo.GetById(movie.StudioId);
-                existing.Director = (Director?)_directorRepo.GetById(movie.DirectorId);
             }
         }
 
@@ -74,25 +62,6 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAOMock
             {
                 _movies.Remove(movie);
             }
-        }
-
-        private IEnumerable<Movie> LoadNavigationProperties(IEnumerable<Movie> movies)
-        {
-            foreach (var movie in movies)
-            {
-                movie.Studio = (Studio?)_studioRepo.GetById(movie.StudioId);
-                movie.Director = (Director?)_directorRepo.GetById(movie.DirectorId);
-            }
-
-            return movies;
-        }
-
-        private Movie LoadNavigationProperties(Movie movie)
-        {
-            movie.Studio = (Studio?)_studioRepo.GetById(movie.StudioId);
-            movie.Director = (Director?)_directorRepo.GetById(movie.DirectorId);
-
-            return movie;
         }
     }
 }

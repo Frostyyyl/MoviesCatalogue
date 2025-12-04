@@ -1,4 +1,4 @@
-﻿@model GrobelnyKasprzak.MovieCatalogue.Interfaces.IMovie
+﻿@model GrobelnyKasprzak.MovieCatalogue.MVC.ViewModels.MovieViewModel
 
 @{
     ViewData["Title"] = "Details";
@@ -17,10 +17,10 @@
             @Html.DisplayFor(model => model.Title)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Studio!.Name)
+            @Html.DisplayNameFor(model => model.Studio)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Studio!.Name)
+            @Html.DisplayFor(model => model.Studio)
         </dd>
     </dl>
 </div>

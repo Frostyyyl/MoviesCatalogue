@@ -9,9 +9,6 @@ namespace GrobelnyKasprzak.MovieCatalogue.Interfaces
         int Year { get; set; }
         MovieGenre Genre { get; set; }
         int StudioId { get; set; }
-        IStudio? Studio { get; set; }
         int DirectorId { get; set; }
-        IDirector? Director { get; set; }
-
     }
 }

@@ -35,6 +35,7 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAOSql
         public void Delete(int id)
         {
             var studio = GetById(id);
+
             if (studio is Studio concreteStudio)
             {
                 _db.Studios.Remove(concreteStudio);

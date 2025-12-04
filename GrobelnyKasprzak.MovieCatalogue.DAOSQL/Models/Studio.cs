@@ -10,6 +10,6 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAOSql.Models
         [Required(ErrorMessage = "Studio name is required")]
         [StringLength(100, MinimumLength = 2, ErrorMessage = "Name must be between 2 and 100 characters")]
         public required string Name { get; set; }
-        public ICollection<IMovie> Movies { get; set; } = [];
+        public ICollection<Movie> Movies { get; set; } = [];
     }
 }

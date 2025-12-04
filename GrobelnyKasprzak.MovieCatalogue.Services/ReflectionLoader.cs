@@ -34,7 +34,7 @@ namespace GrobelnyKasprzak.MovieCatalogue.Services
             }
         }
 
-        public T GetRepository<T>(params object[] args) where T : class
+        public T GetRepository<T>() where T : class
         {
             Type? typeToCreate = null;
 
@@ -52,7 +52,7 @@ namespace GrobelnyKasprzak.MovieCatalogue.Services
                 throw new Exception($"Nie znaleziono implementacji {typeof(T).Name} w bibliotece.");
             }
 
-            var instance = Activator.CreateInstance(typeToCreate, args);
+            var instance = Activator.CreateInstance(typeToCreate);
 
             return instance == null
                 ? throw new Exception($"Nie udało się utworzyć instancji {typeof(T).Name}.")
