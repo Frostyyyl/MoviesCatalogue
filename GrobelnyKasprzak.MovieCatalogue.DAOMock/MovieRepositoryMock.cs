@@ -8,8 +8,8 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAOMock
     {
         private static readonly List<Movie> _movies =
         [
-            new Movie { Id = 1, Title = "Matrix", Year = 1999, StudioId = 1, Genre = MovieGenre.SciFi, DirectorId = 1 },
-            new Movie { Id = 2, Title = "Shrek", Year = 2001, StudioId = 2, Genre = MovieGenre.Animation, DirectorId = 2 }
+            new Movie { Id = 1, Title = "Matrix", Year = 1999, Genre = MovieGenre.SciFi, DirectorId = 1 },
+            new Movie { Id = 2, Title = "Shrek", Year = 2001, Genre = MovieGenre.Animation, DirectorId = 2 }
         ];
 
         private static int _nextId = 3;
@@ -49,7 +49,6 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAOMock
                 existing.Title = movie.Title;
                 existing.Year = movie.Year;
                 existing.Genre = movie.Genre;
-                existing.StudioId = movie.StudioId;
                 existing.DirectorId = movie.DirectorId;
             }
         }

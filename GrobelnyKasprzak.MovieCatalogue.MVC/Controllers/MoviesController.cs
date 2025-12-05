@@ -11,7 +11,6 @@ namespace GrobelnyKasprzak.MovieCatalogue.MVC.Controllers
         private readonly ILogger<MoviesController> _logger;
         private readonly IMapper _mapper;
         private readonly MovieService _movieService = new();
-        private readonly StudioService _studioService = new();
         private readonly DirectorService _directorService = new();
 
         public MoviesController(ILogger<MoviesController> logger, IMapper mapper)
@@ -32,12 +31,10 @@ namespace GrobelnyKasprzak.MovieCatalogue.MVC.Controllers
             var movie = _movieService.GetMovieById(id);
             if (movie == null) return NotFound();
 
-            var studio = _studioService.GetStudioById(movie.StudioId);
             var director = _directorService.GetDirectorById(movie.DirectorId);
 
             var viewModel = _mapper.Map<MovieViewModel>(movie, opt =>
             {
-                opt.Items[MappingKeys.StudioName] = studio?.Name;
                 opt.Items[MappingKeys.DirectorName] = director?.Name;
             });
 

@@ -15,8 +15,6 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAOMock.Models
         public int Year { get; set; }
         [Required(ErrorMessage = "Genre is required")]
         public MovieGenre Genre { get; set; }
-        [Range(1, int.MaxValue, ErrorMessage = "Please select a Studio")]
-        public int StudioId { get; set; }
         [Range(1, int.MaxValue, ErrorMessage = "Please select a Director")]
         public int DirectorId { get; set; }
     }

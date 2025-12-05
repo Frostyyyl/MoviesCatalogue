@@ -8,7 +8,6 @@ namespace GrobelnyKasprzak.MovieCatalogue.MVC.ViewModels
         public required string Title { get; set; }
         public int Year { get; set; }
         public MovieGenre Genre { get; set; }
-        public required string Studio { get; set; }
         public required string Director { get; set; }
     }
 }

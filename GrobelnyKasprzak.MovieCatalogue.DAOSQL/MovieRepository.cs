@@ -17,7 +17,6 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAOSql
         public IEnumerable<IMovie> GetAll()
         {
             return _db.Movies
-                .Include(m => m.Studio)
                 .Include(m => m.Director)
                 .ToList();
         }
@@ -25,7 +24,6 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAOSql
         public IMovie? GetById(int id)
         {
             return _db.Movies
-                .Include(m => m.Studio)
                 .Include(m => m.Director)
                 .FirstOrDefault(m => m.Id == id);
         }
