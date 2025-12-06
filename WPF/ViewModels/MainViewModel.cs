@@ -7,10 +7,13 @@ namespace WPF.ViewModels
         public MoviesViewModel MoviesVM { get; }
         public DirectorsViewModel DirectorsVM { get; }
 
-        public MainViewModel(MovieService movieService, DirectorService directorService)
+        public MainViewModel()
         {
-            MoviesVM = new MoviesViewModel(movieService);
-            DirectorsVM = new DirectorsViewModel(directorService);
+            var movieService = new MovieService();
+            var directorService = new DirectorService();
+
+            MoviesVM = new MoviesViewModel(movieService, directorService);
+            DirectorsVM = new DirectorsViewModel(directorService, movieService);
         }
     }
 }

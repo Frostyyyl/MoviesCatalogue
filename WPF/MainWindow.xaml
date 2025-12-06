@@ -1,91 +1,155 @@
 ﻿<Window x:Class="WPF.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Movie Catalogue" Height="600" Width="900">
-
-    <Grid Margin="10">
+        xmlns:vm="clr-namespace:WPF.ViewModels"
+        Title="Katalog Filmów - Movie Catalogue" Height="750" Width="1400"
+        WindowStartupLocation="CenterScreen">
+    
+    <Window.DataContext>
+        <vm:MainViewModel />
+    </Window.DataContext>
+    
+    <Grid Margin="15">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="15"/>
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- FILMY -->
-        <StackPanel Grid.Column="0" Margin="10">
+        <GroupBox Grid.Column="0" Header="Filmy" Padding="10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-            <TextBlock Text="Filmy" FontSize="22" FontWeight="Bold" Margin="0 0 0 10"/>
-
-            <!-- Wyszukiwanie -->
-            <StackPanel Orientation="Horizontal" Margin="0 0 0 10">
-                <TextBox Width="200" Text="{Binding MoviesVM.SearchText, UpdateSourceTrigger=PropertyChanged}" />
-                <Button Content="Refresh" Command="{Binding MoviesVM.RefreshCommand}" Margin="8,0,0,0"/>
-            </StackPanel>
-
-            <!-- Przyciski -->
-            <StackPanel Orientation="Horizontal" Margin="0 0 0 10">
-                <Button Content="Add" Width="80" Margin="0 0 8 0" Command="{Binding MoviesVM.StartAddCommand}" />
-                <Button Content="Edit" Width="80" Margin="0 0 8 0" Command="{Binding MoviesVM.StartEditCommand}" />
-                <Button Content="Delete" Width="80" Command="{Binding MoviesVM.DeleteCommand}" />
-            </StackPanel>
-
-            <!-- Lista filmów -->
-            <ListBox ItemsSource="{Binding MoviesVM.FilteredMovies}"
-             SelectedItem="{Binding MoviesVM.SelectedMovie}"
-             DisplayMemberPath="Title"
-             Height="300"/>
-
-            <!-- FORMULARZ EDYCJI/DODAWANIA -->
-            <Border BorderBrush="Gray" BorderThickness="1" Padding="10" Margin="0 10 0 0"
-            Visibility="{Binding MoviesVM.IsEditorVisible, Converter={StaticResource BoolToVisibility}}">
-
-                <StackPanel>
-
-                    <TextBlock Text="Edytor filmu" FontSize="16" FontWeight="Bold" Margin="0 0 0 10"/>
-
-                    <TextBlock Text="Title:"/>
-                    <TextBox Text="{Binding MoviesVM.EditorTitle, UpdateSourceTrigger=PropertyChanged}" />
-
-                    <TextBlock Text="Year:" Margin="0 6 0 0"/>
-                    <TextBox Text="{Binding MoviesVM.EditorYear, UpdateSourceTrigger=PropertyChanged}" />
-
-                    <TextBlock Text="Genre:" Margin="0 6 0 0"/>
-                    <ComboBox ItemsSource="{Binding MoviesVM.Genres}"
-                      SelectedItem="{Binding MoviesVM.EditorGenre}" />
-
-                    <TextBlock Text="Director:" Margin="0 6 0 0"/>
-                    <ComboBox ItemsSource="{Binding MoviesVM.Directors}"
-                      DisplayMemberPath="Name"
-                      SelectedValuePath="Id"
-                      SelectedValue="{Binding MoviesVM.EditorDirectorId}" />
-
-                    <!-- Błędy -->
-                    <TextBlock Text="{Binding MoviesVM.EditorError}" Foreground="Red" Margin="0 10 0 0"/>
-
-                    <!-- SAVE / CANCEL -->
-                    <StackPanel Orientation="Horizontal" Margin="0 10 0 0">
-                        <Button Content="Save" Width="80" Margin="0 0 10 0" Command="{Binding MoviesVM.SaveCommand}" />
-                        <Button Content="Cancel" Width="80" Command="{Binding MoviesVM.CancelCommand}" />
-                    </StackPanel>
-
+                <StackPanel Grid.Row="0" Margin="0,0,0,10">
+                    <TextBlock Text="Wyszukaj film:" FontWeight="SemiBold"/>
+                    <TextBox Text="{Binding MoviesVM.SearchText, UpdateSourceTrigger=PropertyChanged}"
+                             Padding="5" Height="30" Margin="0,5,0,0"/>
                 </StackPanel>
 
-            </Border>
-        </StackPanel>
+                <GroupBox Grid.Row="1" Header="Formularz filmu" Padding="10" Margin="0,0,0,10">
+                    <StackPanel>
+                        <TextBlock Text="Tytuł:"/>
+                        <TextBox Text="{Binding MoviesVM.Title, UpdateSourceTrigger=PropertyChanged}"
+                                 Padding="5" Height="30" Margin="0,3,0,0"/>
 
-        <!-- REŻYSERZY -->
-        <StackPanel Grid.Column="1" Margin="10">
-            <TextBlock Text="Reżyserzy" FontSize="22" FontWeight="Bold" Margin="0 0 0 10"/>
+                        <Grid Margin="0,8,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
 
-            <StackPanel Orientation="Horizontal" Margin="0 0 0 10">
-                <Button Content="Add" Command="{Binding DirectorsVM.AddCommand}" Width="80" Margin="0 0 8 0"/>
-                <Button Content="Edit" Command="{Binding DirectorsVM.EditCommand}" Width="80" Margin="0 0 8 0"/>
-                <Button Content="Delete" Command="{Binding DirectorsVM.DeleteCommand}" Width="80"/>
-            </StackPanel>
+                            <StackPanel>
+                                <TextBlock Text="Rok:"/>
+                                <TextBox Text="{Binding MoviesVM.Year, UpdateSourceTrigger=PropertyChanged}"
+                                         Padding="5" Height="30" Margin="0,3,0,0"/>
+                            </StackPanel>
 
-            <ListBox ItemsSource="{Binding DirectorsVM.Directors}"
-                     SelectedItem="{Binding DirectorsVM.SelectedDirector}"
-                     DisplayMemberPath="Name"
-                     Height="450"/>
-        </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Gatunek:"/>
+                                <ComboBox ItemsSource="{Binding MoviesVM.Genres}"
+                                          SelectedItem="{Binding MoviesVM.Genre}"
+                                          Padding="5" Height="30" Margin="0,3,0,0"/>
+                            </StackPanel>
+                        </Grid>
 
+                        <TextBlock Text="Reżyser:" Margin="0,8,0,0"/>
+                        <ComboBox ItemsSource="{Binding DirectorsVM.Directors}"
+                                  SelectedItem="{Binding MoviesVM.SelectedDirector}"
+                                  DisplayMemberPath="Name"
+                                  Padding="5" Height="30" Margin="0,3,0,0"/>
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,12,0,0">
+                            <Button Content="Dodaj" Command="{Binding MoviesVM.AddCommand}"
+                                    Width="90" Height="35" Margin="5"/>
+                            <Button Content="Aktualizuj" Command="{Binding MoviesVM.UpdateCommand}"
+                                    Width="90" Height="35" Margin="5"/>
+                            <Button Content="Usuń" Command="{Binding MoviesVM.DeleteCommand}"
+                                    Width="90" Height="35" Margin="5"/>
+                            <Button Content="Wyczyść" Command="{Binding MoviesVM.ClearCommand}"
+                                    Width="90" Height="35" Margin="5"/>
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+
+                <DataGrid Grid.Row="2" ItemsSource="{Binding MoviesVM.Movies}"
+                          SelectedItem="{Binding MoviesVM.SelectedMovie}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          SelectionMode="Single"
+                          CanUserAddRows="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
+                        <DataGridTextColumn Header="Tytuł" Binding="{Binding Title}" Width="*"/>
+                        <DataGridTextColumn Header="Rok" Binding="{Binding Year}" Width="70"/>
+                        <DataGridTextColumn Header="Gatunek" Binding="{Binding Genre}" Width="120"/>
+                        <DataGridTextColumn Header="ID Reżysera" Binding="{Binding DirectorId}" Width="90"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <TextBlock Grid.Row="3" Margin="0,10,0,0" FontWeight="SemiBold">
+                    <Run Text="Liczba filmów: "/>
+                    <Run Text="{Binding MoviesVM.Movies.Count, Mode=OneWay}"/>
+                </TextBlock>
+            </Grid>
+        </GroupBox>
+
+        <GroupBox Grid.Column="2" Header="Reżyserzy" Padding="10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Margin="0,0,0,10">
+                    <TextBlock Text="Wyszukaj reżysera:" FontWeight="SemiBold"/>
+                    <TextBox Text="{Binding DirectorsVM.SearchText, UpdateSourceTrigger=PropertyChanged}"
+                             Padding="5" Height="30" Margin="0,5,0,0"/>
+                </StackPanel>
+
+                <GroupBox Grid.Row="1" Header="Formularz reżysera" Padding="10" Margin="0,0,0,10">
+                    <StackPanel>
+                        <TextBlock Text="Imię i nazwisko:"/>
+                        <TextBox Text="{Binding DirectorsVM.Name, UpdateSourceTrigger=PropertyChanged}"
+                                 Padding="5" Height="30" Margin="0,3,0,0"/>
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,12,0,0">
+                            <Button Content="Dodaj" Command="{Binding DirectorsVM.AddCommand}"
+                                    Width="90" Height="35" Margin="5"/>
+                            <Button Content="Aktualizuj" Command="{Binding DirectorsVM.UpdateCommand}"
+                                    Width="90" Height="35" Margin="5"/>
+                            <Button Content="Usuń" Command="{Binding DirectorsVM.DeleteCommand}"
+                                    Width="90" Height="35" Margin="5"/>
+                            <Button Content="Wyczyść" Command="{Binding DirectorsVM.ClearCommand}"
+                                    Width="90" Height="35" Margin="5"/>
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+
+                <DataGrid Grid.Row="2" ItemsSource="{Binding DirectorsVM.Directors}"
+                          SelectedItem="{Binding DirectorsVM.SelectedDirector}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          SelectionMode="Single"
+                          CanUserAddRows="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
+                        <DataGridTextColumn Header="Imię i nazwisko" Binding="{Binding Name}" Width="*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <TextBlock Grid.Row="3" Margin="0,10,0,0" FontWeight="SemiBold">
+                    <Run Text="Liczba reżyserów: "/>
+                    <Run Text="{Binding DirectorsVM.Directors.Count, Mode=OneWay}"/>
+                </TextBlock>
+            </Grid>
+        </GroupBox>
     </Grid>
 </Window>
