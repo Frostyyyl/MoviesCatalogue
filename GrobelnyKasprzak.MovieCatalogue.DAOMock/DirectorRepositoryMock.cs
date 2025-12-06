@@ -25,6 +25,11 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAOMock
             return _directors.FirstOrDefault(d => d.Id == id);
         }
 
+        public IDirector CreateNew()
+        {
+            return new Director { Name = "" };
+        }
+
         public void Add(IDirector director)
         {
             if (director is Director concreteDirector)

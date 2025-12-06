@@ -1,18 +1,29 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.0" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="9.1.1" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\GrobelnyKasprzak.MovieCatalogue.Services\GrobelnyKasprzak.MovieCatalogue.Services.csproj" />
   </ItemGroup>
+
+  <!-- Copy DAOMock dll from its project output into this project's output so ReflectionLoader can load it from file -->
+  <Target Name="CopyDaoMockDll" AfterTargets="Build">
+    <PropertyGroup>
+      <DaoMockDll>$(SolutionDir)GrobelnyKasprzak.MovieCatalogue.DAOMock\bin\$(Configuration)\$(TargetFramework)\GrobelnyKasprzak.MovieCatalogue.DAOMock.dll</DaoMockDll>
+    </PropertyGroup>
+
+    <Message Importance="High" Text="Attempting to copy DAOMock dll from '$(DaoMockDll)' to '$(OutputPath)'" />
+
+    <Copy SourceFiles="$(DaoMockDll)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" Condition="Exists('$(DaoMockDll)')" />
+  </Target>
 
 </Project>

@@ -50,5 +50,10 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAOSql
                 _db.SaveChanges();
             }
         }
+
+        public IMovie CreateNew()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

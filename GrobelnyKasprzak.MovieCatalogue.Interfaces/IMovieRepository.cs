@@ -7,5 +7,6 @@
         void Add(IMovie movie);
         void Update(IMovie movie);
         void Delete(int id);
+        IMovie CreateNew();
     }
 }

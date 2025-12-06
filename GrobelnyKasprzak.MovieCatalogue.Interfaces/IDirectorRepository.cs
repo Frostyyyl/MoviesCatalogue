@@ -7,5 +7,6 @@
         void Add(IDirector director);
         void Update(IDirector director);
         void Delete(int id);
+        IDirector CreateNew();
     }
 }

@@ -31,6 +31,11 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAOMock
             return null;
         }
 
+        public IMovie CreateNew()
+        {
+            return new Movie { Title = ""};
+        }
+
         public void Add(IMovie movie)
         {
             if (movie is Movie concreteMovie)

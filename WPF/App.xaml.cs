@@ -2,7 +2,7 @@
 using System.Data;
 using System.Windows;
 
-namespace GrobelnyKasprzak.MovieCatalogue.Wpf
+namespace WPF
 {
     /// <summary>
     /// Interaction logic for App.xaml

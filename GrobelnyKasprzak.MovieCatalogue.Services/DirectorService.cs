@@ -12,6 +12,11 @@ namespace GrobelnyKasprzak.MovieCatalogue.Services
             _repo = loader.GetRepository<IDirectorRepository>();
         }
 
+        public DirectorService(IDirectorRepository repo)
+        {
+            _repo = repo;
+        }
+
         public IEnumerable<IDirector> GetAllDirectors() => _repo.GetAll();
 
         public IDirector? GetDirectorById(int id) => _repo.GetById(id);
@@ -21,5 +26,6 @@ namespace GrobelnyKasprzak.MovieCatalogue.Services
         public void UpdateDirector(IDirector director) => _repo.Update(director);
 
         public void DeleteDirector(int id) => _repo.Delete(id);
+        public IDirector CreateNewDirector() => _repo.CreateNew();
     }
 }

@@ -42,5 +42,10 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAOSql
                 _db.SaveChanges();
             }
         }
+
+        public IDirector CreateNew()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
