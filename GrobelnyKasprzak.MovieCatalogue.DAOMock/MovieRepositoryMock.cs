@@ -19,6 +19,11 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAOMock
             return _movies;
         }
 
+        public IEnumerable<IMovie> GetByDirectorId(int directorId)
+        {
+            return _movies.Where(m => m.DirectorId == directorId).ToList();
+        }
+
         public IMovie? GetById(int id)
         {
             var movie = _movies.FirstOrDefault(m => m.Id == id);
@@ -33,21 +38,26 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAOMock
 
         public IMovie CreateNew()
         {
-            return new Movie { Title = ""};
+            return new Movie { Title = "", Year = 2025 };
         }
 
         public void Add(IMovie movie)
         {
-            if (movie is Movie concreteMovie)
+            var newMovie = new Movie
             {
-                concreteMovie.Id = _nextId++;
-                _movies.Add(concreteMovie);
-            }
+                Id = _nextId++,
+                Title = movie.Title,
+                Year = movie.Year,
+                Genre = movie.Genre,
+                DirectorId = movie.DirectorId
+            };
+
+            _movies.Add(newMovie);
         }
 
         public void Update(IMovie movie)
         {
-            var existing = _movies.FirstOrDefault(m => m.Id == movie.Id);
+            var existing = GetById(movie.Id);
 
             if (existing != null)
             {
@@ -60,11 +70,11 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAOMock
 
         public void Delete(int id)
         {
-            var movie = _movies.FirstOrDefault(m => m.Id == id);
+            var movie = GetById(id);
 
             if (movie != null)
             {
-                _movies.Remove(movie);
+                _movies.Remove((Movie)movie);
             }
         }
     }

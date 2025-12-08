@@ -32,20 +32,22 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAOMock
 
         public void Add(IDirector director)
         {
-            if (director is Director concreteDirector)
+            var newDirector = new Director
             {
-                concreteDirector.Id = _nextId++;
-                _directors.Add(concreteDirector);
-            }
+                Id = _nextId++,
+                Name = director.Name
+            };
+
+            _directors.Add(newDirector);
         }
 
         public void Update(IDirector director)
         {
             var existing = GetById(director.Id);
 
-            if (existing is Director existingDirector)
+            if (existing != null)
             {
-                existingDirector.Name = director.Name;
+                existing.Name = director.Name;
             }
         }
 
@@ -53,9 +55,9 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAOMock
         {
             var director = GetById(id);
 
-            if (director is Director concreteDirector)
+            if (director != null)
             {
-                _directors.Remove(concreteDirector);
+                _directors.Remove((Director)director);
             }
         }
     }

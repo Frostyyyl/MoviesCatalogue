@@ -19,6 +19,9 @@ namespace GrobelnyKasprzak.MovieCatalogue.Services
 
         public IEnumerable<IMovie> GetAllMovies() => _repo.GetAll();
 
+        public IEnumerable<IMovie> GetMoviesByDirectorId(int directorId)
+            => _repo.GetByDirectorId(directorId);
+
         public IMovie? GetMovieById(int id) => _repo.GetById(id);
 
         public void AddMovie(IMovie movie) => _repo.Add(movie);
@@ -26,6 +29,7 @@ namespace GrobelnyKasprzak.MovieCatalogue.Services
         public void UpdateMovie(IMovie movie) => _repo.Update(movie);
 
         public void DeleteMovie(int id) => _repo.Delete(id);
+
         public IMovie CreateNewMovie() => _repo.CreateNew();
     }
 }

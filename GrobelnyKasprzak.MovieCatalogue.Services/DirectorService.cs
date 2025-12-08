@@ -26,6 +26,7 @@ namespace GrobelnyKasprzak.MovieCatalogue.Services
         public void UpdateDirector(IDirector director) => _repo.Update(director);
 
         public void DeleteDirector(int id) => _repo.Delete(id);
+
         public IDirector CreateNewDirector() => _repo.CreateNew();
     }
 }
