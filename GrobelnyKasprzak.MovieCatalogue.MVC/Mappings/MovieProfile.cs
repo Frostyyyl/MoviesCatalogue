@@ -16,8 +16,9 @@ public class MovieProfile : Profile
                     ? name : "Unknown"))
             .ForMember(dest => dest.AvailableDirectors, opt => opt.MapFrom((src, dest, _, ctx) =>
             {
-                if (ctx.Items.TryGetValue(MappingKeys.AvailableDirectors, out var listObj) &&
-                    listObj is IEnumerable<IDirector> directors)
+                if (ctx.TryGetItems(out var items) &&
+                    items.TryGetValue(MappingKeys.AvailableDirectors, out var directorsObj) &&
+                    directorsObj is IEnumerable<IDirector> directors)
                 {
                     return ctx.Mapper.Map<IEnumerable<SelectListItem>>(directors);
                 }
@@ -25,8 +26,9 @@ public class MovieProfile : Profile
             }))
             .ForMember(dest => dest.AvailableGenres, opt => opt.MapFrom((src, dest, _, ctx) =>
             {
-                if (ctx.Items.TryGetValue(MappingKeys.AvailableGenres, out var listObj) &&
-                    listObj is IEnumerable<MovieGenre> genres)
+                if (ctx.TryGetItems(out var items) &&
+                    items.TryGetValue(MappingKeys.AvailableGenres, out var genresObj) &&
+                    genresObj is IEnumerable<MovieGenre> genres)
                 {
                     return ctx.Mapper.Map<IEnumerable<SelectListItem>>(genres);
                 }

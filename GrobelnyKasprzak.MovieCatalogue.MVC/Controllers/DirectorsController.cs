@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using GrobelnyKasprzak.MovieCatalogue.MVC.Mappings;
+using GrobelnyKasprzak.MovieCatalogue.MVC.Models.Dto;
 using GrobelnyKasprzak.MovieCatalogue.MVC.ViewModels;
 using GrobelnyKasprzak.MovieCatalogue.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -20,9 +21,33 @@ namespace GrobelnyKasprzak.MovieCatalogue.MVC.Controllers
         }
 
         // GET: DirectorController
-        public ActionResult Index()
+        public ActionResult Index(string? search)
         {
-            return View();
+            var directors = _directorService.GetAllDirectors();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.Trim().ToLower();
+
+                directors = [.. directors.Where(m =>
+                    m.Name.Contains(search, StringComparison.CurrentCultureIgnoreCase))];
+            }
+
+            var viewModel = new List<DirectorViewModel>();
+
+            foreach (var director in directors)
+            {
+                var movies = _movieService.GetMoviesByDirectorId(director.Id);
+
+                viewModel.Add(_mapper.Map<DirectorViewModel>(director, opt =>
+                {
+                    opt.Items[MappingKeys.Movies] = movies;
+                }));
+            }
+
+            @ViewData["Search"] = search;
+
+            return View(viewModel);
         }
 
         // GET: DirectorController/Details/5
@@ -44,49 +69,64 @@ namespace GrobelnyKasprzak.MovieCatalogue.MVC.Controllers
         // GET: DirectorController/Create
         public ActionResult Create()
         {
-            return View();
+            var newDirector = _directorService.CreateNewDirector();
+
+            var viewModel = _mapper.Map<DirectorViewModel>(newDirector);
+
+            return View(viewModel);
         }
 
         // POST: DirectorController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public ActionResult Create(DirectorViewModel model)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                return RedirectToAction(nameof(Index));
+                return View(model);
             }
-            catch
-            {
-                return View();
-            }
+
+            var director = _mapper.Map<DirectorDto>(model);
+            _directorService.AddDirector(director);
+
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: DirectorController/Edit/5
         public ActionResult Edit(int id)
         {
-            return View();
+            var newDirector = _directorService.GetDirectorById(id);
+
+            var viewModel = _mapper.Map<DirectorViewModel>(newDirector);
+
+            return View(viewModel);
         }
 
         // POST: DirectorController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Edit(int id, DirectorViewModel viewModel)
         {
-            try
+            if (id != viewModel.Id) return BadRequest();
+
+            if (!ModelState.IsValid)
             {
-                return RedirectToAction(nameof(Index));
+                return View(viewModel);
             }
-            catch
-            {
-                return View();
-            }
+
+            var directorToUpdate = _mapper.Map<DirectorDto>(viewModel);
+            _directorService.UpdateDirector(directorToUpdate);
+
+            return RedirectToAction(nameof(Details), new { id });
         }
 
         // GET: DirectorController/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
+            var director = _directorService.GetDirectorById(id);
+            if (director == null) return NotFound();
+
+            return View(director);
         }
 
         // POST: DirectorController/Delete/5
@@ -94,14 +134,9 @@ namespace GrobelnyKasprzak.MovieCatalogue.MVC.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Delete(int id, IFormCollection collection)
         {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
+            _directorService.DeleteDirector(id);
+
+            return RedirectToAction(nameof(Index));
         }
     }
 }

@@ -11,7 +11,8 @@ public class DirectorProfile : Profile
         CreateMap<IDirector, DirectorViewModel>()
             .ForMember(dest => dest.Movies, opt => opt.MapFrom((src, dest, _, ctx) =>
             {
-                if (ctx.Items.TryGetValue(MappingKeys.Movies, out var moviesObj) &&
+                if (ctx.TryGetItems(out var items) &&
+                    items.TryGetValue(MappingKeys.Movies, out var moviesObj) &&
                     moviesObj is IEnumerable<IMovie> movies)
                 {
                     return ctx.Mapper.Map<IEnumerable<MovieListItemViewModel>>(movies);

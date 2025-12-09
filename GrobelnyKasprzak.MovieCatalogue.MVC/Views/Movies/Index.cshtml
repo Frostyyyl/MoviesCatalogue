@@ -27,7 +27,7 @@
                 <th>Year</th>
                 <th>Genre</th>
                 <th>Director</th>
-                <th></th>
+                <th class="text-end"></th>
             </tr>
         </thead>
         <tbody>
@@ -46,7 +46,7 @@
                     <td>
                         @Html.DisplayFor(modelItem => item.Director)
                     </td>
-                    <td>
+                    <td class="text-end">
                         <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
                         <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
                         <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>

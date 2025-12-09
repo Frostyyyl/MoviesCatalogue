@@ -1,0 +1,42 @@
+﻿@model GrobelnyKasprzak.MovieCatalogue.MVC.ViewModels.DirectorViewModel
+
+@{
+    ViewData["Title"] = "Add Director";
+}
+
+<div class="mt-2 p-2">
+
+    <div class="mb-4 px-1 d-flex justify-content-between align-items-center">
+        <h2>Add Director</h2>
+    </div>
+
+    <hr />
+
+    <div class="row px-1">
+        <div class="col-md-4 fw-bold">
+            <form asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="form-group">
+                    <label asp-for="Name" class="form-label"></label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mt-4">
+                    <input type="submit" value="Create" class="btn btn-primary" />
+                    <a asp-action="Index" class="btn btn-secondary">Back</a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
