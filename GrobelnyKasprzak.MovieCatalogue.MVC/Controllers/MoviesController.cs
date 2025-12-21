@@ -1,10 +1,11 @@
 ﻿using AutoMapper;
-using GrobelnyKasprzak.MovieCatalogue.Core;
-using GrobelnyKasprzak.MovieCatalogue.MVC.Mappings;
 using GrobelnyKasprzak.MovieCatalogue.MVC.Models.Dto;
+using GrobelnyKasprzak.MovieCatalogue.MVC.Services;
 using GrobelnyKasprzak.MovieCatalogue.MVC.ViewModels;
 using GrobelnyKasprzak.MovieCatalogue.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using System.ComponentModel.DataAnnotations;
 
 namespace GrobelnyKasprzak.MovieCatalogue.MVC.Controllers
 {
@@ -12,13 +13,15 @@ namespace GrobelnyKasprzak.MovieCatalogue.MVC.Controllers
     {
         private readonly ILogger<MoviesController> _logger;
         private readonly IMapper _mapper;
+        private readonly ILookupService _lookupService;
         private readonly MovieService _movieService = new();
         private readonly DirectorService _directorService = new();
 
-        public MoviesController(ILogger<MoviesController> logger, IMapper mapper)
+        public MoviesController(ILogger<MoviesController> logger, IMapper mapper, ILookupService lookupService)
         {
             _logger = logger;
             _mapper = mapper;
+            _lookupService = lookupService;
         }
 
         // GET: MoviesController
@@ -34,17 +37,8 @@ namespace GrobelnyKasprzak.MovieCatalogue.MVC.Controllers
                     m.Title.Contains(search, StringComparison.CurrentCultureIgnoreCase))];
             }
 
-            var viewModel = new List<MovieViewModel>();
-
-            foreach (var movie in movies)
-            {
-                var director = _directorService.GetDirectorById(movie.DirectorId);
-
-                viewModel.Add(_mapper.Map<MovieViewModel>(movie, opt =>
-                {
-                    opt.Items[MappingKeys.DirectorName] = director?.Name;
-                }));
-            }
+            var viewModel = _mapper.Map<List<MovieViewModel>>(movies);
+            SetDirectorNames(viewModel);
 
             @ViewData["Search"] = search;
 
@@ -57,12 +51,8 @@ namespace GrobelnyKasprzak.MovieCatalogue.MVC.Controllers
             var movie = _movieService.GetMovieById(id);
             if (movie == null) return NotFound();
 
-            var director = _directorService.GetDirectorById(movie.DirectorId);
-
-            var viewModel = _mapper.Map<MovieViewModel>(movie, opt =>
-            {
-                opt.Items[MappingKeys.DirectorName] = director?.Name;
-            });
+            var viewModel = _mapper.Map<MovieViewModel>(movie);
+            SetDirectorName(viewModel);
 
             return View(viewModel);
         }
@@ -72,16 +62,8 @@ namespace GrobelnyKasprzak.MovieCatalogue.MVC.Controllers
         {
             var newMovie = _movieService.CreateNewMovie();
 
-            var director = _directorService.GetDirectorById(newMovie.DirectorId);
-            var availableDirectors = _directorService.GetAllDirectors();
-            var availableGenres = Enum.GetValues<MovieGenre>();
-
-            var viewModel = _mapper.Map<MovieViewModel>(newMovie, opt =>
-            {
-                opt.Items[MappingKeys.DirectorName] = director?.Name;
-                opt.Items[MappingKeys.AvailableDirectors] = availableDirectors;
-                opt.Items[MappingKeys.AvailableGenres] = availableGenres;
-            });
+            var viewModel = _mapper.Map<MovieViewModel>(newMovie);
+            PopulateViewModel(viewModel);
 
             return View(viewModel);
         }
@@ -93,22 +75,24 @@ namespace GrobelnyKasprzak.MovieCatalogue.MVC.Controllers
         {
             if (!ModelState.IsValid)
             {
-                var directors = _directorService.GetAllDirectors();
-                var genres = Enum.GetValues<MovieGenre>();
-
-                _mapper.Map(model, model, opt =>
-                {
-                    opt.Items[MappingKeys.AvailableDirectors] = directors;
-                    opt.Items[MappingKeys.AvailableGenres] = genres;
-                });
-
+                PopulateDropdowns(model);
                 return View(model);
             }
 
-            var movie = _mapper.Map<MovieDto>(model);
-            _movieService.AddMovie(movie);
+            try
+            {
+                var movie = _mapper.Map<MovieDto>(model);
+                _movieService.AddMovie(movie);
 
-            return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index));
+            }
+            catch (ValidationException exception)
+            {
+                ModelState.AddModelError(string.Empty, exception.Message);
+
+                PopulateDropdowns(model);
+                return View(model);
+            }
         }
 
         // GET: MoviesController/Edit/5
@@ -117,16 +101,8 @@ namespace GrobelnyKasprzak.MovieCatalogue.MVC.Controllers
             var movie = _movieService.GetMovieById(id);
             if (movie == null) return NotFound();
 
-            var director = _directorService.GetDirectorById(movie.DirectorId);
-            var availableDirectors = _directorService.GetAllDirectors();
-            var availableGenres = Enum.GetValues<MovieGenre>();
-
-            var viewModel = _mapper.Map<MovieViewModel>(movie, opt =>
-            {
-                opt.Items[MappingKeys.DirectorName] = director?.Name;
-                opt.Items[MappingKeys.AvailableDirectors] = availableDirectors;
-                opt.Items[MappingKeys.AvailableGenres] = availableGenres;
-            });
+            var viewModel = _mapper.Map<MovieViewModel>(movie);
+            PopulateViewModel(viewModel);
 
             return View(viewModel);
         }
@@ -134,28 +110,30 @@ namespace GrobelnyKasprzak.MovieCatalogue.MVC.Controllers
         // POST: MoviesController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, MovieViewModel viewModel)
+        public ActionResult Edit(int id, MovieViewModel model)
         {
-            if (id != viewModel.Id) return BadRequest();
+            if (id != model.Id) return BadRequest();
 
             if (!ModelState.IsValid)
             {
-                var directors = _directorService.GetAllDirectors();
-                var genres = Enum.GetValues<MovieGenre>();
-
-                _mapper.Map(viewModel, viewModel, opt =>
-                {
-                    opt.Items[MappingKeys.AvailableDirectors] = directors;
-                    opt.Items[MappingKeys.AvailableGenres] = genres;
-                });
-
-                return View(viewModel);
+                PopulateDropdowns(model);
+                return View(model);
             }
 
-            var movieToUpdate = _mapper.Map<MovieDto>(viewModel);
-            _movieService.UpdateMovie(movieToUpdate);
+            try
+            {
+                var movieToUpdate = _mapper.Map<MovieDto>(model);
+                _movieService.UpdateMovie(movieToUpdate);
 
-            return RedirectToAction(nameof(Details), new { id });
+                return RedirectToAction(nameof(Details), new { id });
+            }
+            catch (ValidationException exception)
+            {
+                ModelState.AddModelError(string.Empty, exception.Message);
+
+                PopulateDropdowns(model);
+                return View(model);
+            }
         }
 
 
@@ -176,6 +154,33 @@ namespace GrobelnyKasprzak.MovieCatalogue.MVC.Controllers
             _movieService.DeleteMovie(id);
 
             return RedirectToAction(nameof(Index));
+        }
+
+        private void SetDirectorName(MovieViewModel model)
+        {
+            var director = _directorService.GetDirectorById(model.DirectorId);
+            model.Director = director?.Name ?? "Unknown Director";
+        }
+
+        private void SetDirectorNames(IEnumerable<MovieViewModel> models)
+        {
+            foreach (var model in models)
+            {
+                SetDirectorName(model);
+            }
+        }
+
+        private void PopulateDropdowns(MovieViewModel model)
+        {
+            model.AvailableDirectors = _mapper.Map<IEnumerable<SelectListItem>>
+                (_directorService.GetAllDirectors());
+            model.AvailableGenres = _lookupService.GetGenreSelectList();
+        }
+
+        private void PopulateViewModel(MovieViewModel model)
+        {
+            SetDirectorName(model);
+            PopulateDropdowns(model);
         }
     }
 }

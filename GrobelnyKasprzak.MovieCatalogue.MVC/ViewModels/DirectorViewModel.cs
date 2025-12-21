@@ -3,7 +3,7 @@
 public class DirectorViewModel
 {
     public int Id { get; set; }
-    public required string Name { get; set; }
-    public ICollection<MovieListItemViewModel> Movies { get; set; } = [];
+    public string Name { get; set; } = string.Empty;
+    public IEnumerable<MovieListItemViewModel> Movies { get; set; } = [];
 }
 

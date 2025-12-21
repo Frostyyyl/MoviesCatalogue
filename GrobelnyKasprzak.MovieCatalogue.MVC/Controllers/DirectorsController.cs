@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
-using GrobelnyKasprzak.MovieCatalogue.MVC.Mappings;
 using GrobelnyKasprzak.MovieCatalogue.MVC.Models.Dto;
 using GrobelnyKasprzak.MovieCatalogue.MVC.ViewModels;
 using GrobelnyKasprzak.MovieCatalogue.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace GrobelnyKasprzak.MovieCatalogue.MVC.Controllers
 {
@@ -33,17 +33,8 @@ namespace GrobelnyKasprzak.MovieCatalogue.MVC.Controllers
                     m.Name.Contains(search, StringComparison.CurrentCultureIgnoreCase))];
             }
 
-            var viewModel = new List<DirectorViewModel>();
-
-            foreach (var director in directors)
-            {
-                var movies = _movieService.GetMoviesByDirectorId(director.Id);
-
-                viewModel.Add(_mapper.Map<DirectorViewModel>(director, opt =>
-                {
-                    opt.Items[MappingKeys.Movies] = movies;
-                }));
-            }
+            var viewModel = _mapper.Map<List<DirectorViewModel>>(directors);
+            SetMovies(viewModel);
 
             @ViewData["Search"] = search;
 
@@ -56,12 +47,8 @@ namespace GrobelnyKasprzak.MovieCatalogue.MVC.Controllers
             var director = _directorService.GetDirectorById(id);
             if (director == null) return NotFound();
 
-            var movies = _movieService.GetMoviesByDirectorId(director.Id);
-
-            var viewModel = _mapper.Map<DirectorViewModel>(director, opt =>
-            {
-                opt.Items[MappingKeys.Movies] = movies;
-            });
+            var viewModel = _mapper.Map<DirectorViewModel>(director);
+            SetMovies(viewModel);
 
             return View(viewModel);
         }
@@ -86,10 +73,19 @@ namespace GrobelnyKasprzak.MovieCatalogue.MVC.Controllers
                 return View(model);
             }
 
-            var director = _mapper.Map<DirectorDto>(model);
-            _directorService.AddDirector(director);
+            try
+            {
+                var director = _mapper.Map<DirectorDto>(model);
+                _directorService.AddDirector(director);
 
-            return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index));
+            }
+            catch (ValidationException exception)
+            {
+                ModelState.AddModelError(string.Empty, exception.Message);
+
+                return View(model);
+            }
         }
 
         // GET: DirectorController/Edit/5
@@ -105,19 +101,28 @@ namespace GrobelnyKasprzak.MovieCatalogue.MVC.Controllers
         // POST: DirectorController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, DirectorViewModel viewModel)
+        public ActionResult Edit(int id, DirectorViewModel model)
         {
-            if (id != viewModel.Id) return BadRequest();
+            if (id != model.Id) return BadRequest();
 
             if (!ModelState.IsValid)
             {
-                return View(viewModel);
+                return View(model);
             }
 
-            var directorToUpdate = _mapper.Map<DirectorDto>(viewModel);
-            _directorService.UpdateDirector(directorToUpdate);
+            try
+            {
+                var directorToUpdate = _mapper.Map<DirectorDto>(model);
+                _directorService.UpdateDirector(directorToUpdate);
 
-            return RedirectToAction(nameof(Details), new { id });
+                return RedirectToAction(nameof(Details), new { id });
+            }
+            catch (ValidationException exception)
+            {
+                ModelState.AddModelError(string.Empty, exception.Message);
+
+                return View(model);
+            }
         }
 
         // GET: DirectorController/Delete/5
@@ -137,6 +142,20 @@ namespace GrobelnyKasprzak.MovieCatalogue.MVC.Controllers
             _directorService.DeleteDirector(id);
 
             return RedirectToAction(nameof(Index));
+        }
+
+        private void SetMovies(DirectorViewModel model)
+        {
+            model.Movies = _mapper.Map<IEnumerable<MovieListItemViewModel>>
+                (_movieService.GetMoviesByDirectorId(model.Id));
+        }
+
+        private void SetMovies(IEnumerable<DirectorViewModel> models)
+        {
+            foreach (var model in models)
+            {
+                SetMovies(model);
+            }
         }
     }
 }

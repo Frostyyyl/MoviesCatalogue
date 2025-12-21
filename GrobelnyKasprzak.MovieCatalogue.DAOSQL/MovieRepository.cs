@@ -1,6 +1,5 @@
 ﻿using GrobelnyKasprzak.MovieCatalogue.DAOSql.Models;
 using GrobelnyKasprzak.MovieCatalogue.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace GrobelnyKasprzak.MovieCatalogue.DAOSql
 {
@@ -14,19 +13,13 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAOSql
             _db.Database.EnsureCreated();
         }
 
-        public IEnumerable<IMovie> GetAll()
-        {
-            return _db.Movies
-                .Include(m => m.Director)
-                .ToList();
-        }
+        public IEnumerable<IMovie> GetAll() => _db.Movies.ToList();
 
-        public IMovie? GetById(int id)
-        {
-            return _db.Movies
-                .Include(m => m.Director)
-                .FirstOrDefault(m => m.Id == id);
-        }
+        public IEnumerable<IMovie> GetByDirectorId(int directorId) =>
+            _db.Movies.Where(m => m.DirectorId == directorId).ToList();
+
+        public IMovie? GetById(int id) =>
+            _db.Movies.FirstOrDefault(m => m.Id == id);
 
         public void Add(IMovie movie)
         {

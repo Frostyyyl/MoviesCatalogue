@@ -1,6 +1,7 @@
 ﻿using GrobelnyKasprzak.MovieCatalogue.Core;
 using GrobelnyKasprzak.MovieCatalogue.DAOMock.Models;
 using GrobelnyKasprzak.MovieCatalogue.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
 namespace GrobelnyKasprzak.MovieCatalogue.DAOMock
 {
@@ -26,23 +27,18 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAOMock
 
         public IMovie? GetById(int id)
         {
-            var movie = _movies.FirstOrDefault(m => m.Id == id);
-
-            if (movie != null)
-            {
-                return movie;
-            }
-
-            return null;
+            return _movies.FirstOrDefault(m => m.Id == id);
         }
 
         public IMovie CreateNew()
         {
-            return new Movie { Title = "", Year = 2025 };
+            return new Movie { Year = DateTime.Now.Year };
         }
 
         public void Add(IMovie movie)
         {
+            ArgumentNullException.ThrowIfNull(movie);
+
             var newMovie = new Movie
             {
                 Id = _nextId++,
@@ -52,30 +48,46 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAOMock
                 DirectorId = movie.DirectorId
             };
 
+            ValidateMovie(newMovie);
+
             _movies.Add(newMovie);
         }
 
         public void Update(IMovie movie)
         {
-            var existing = GetById(movie.Id);
+            ArgumentNullException.ThrowIfNull(movie);
 
-            if (existing != null)
+            var existing = GetById(movie.Id)
+                ?? throw new KeyNotFoundException($"Movie with ID {movie.Id} not found.");
+
+            var movieToUpdate = new Movie
             {
-                existing.Title = movie.Title;
-                existing.Year = movie.Year;
-                existing.Genre = movie.Genre;
-                existing.DirectorId = movie.DirectorId;
-            }
+                Title = movie.Title,
+                Year = movie.Year,
+                Genre = movie.Genre,
+                DirectorId = movie.DirectorId
+            };
+
+            ValidateMovie(movieToUpdate);
+
+            existing.Title = movieToUpdate.Title;
+            existing.Year = movieToUpdate.Year;
+            existing.Genre = movieToUpdate.Genre;
+            existing.DirectorId = movieToUpdate.DirectorId;
         }
 
         public void Delete(int id)
         {
-            var movie = GetById(id);
+            var movie = GetById(id)
+                ?? throw new KeyNotFoundException($"Movie with ID {id} not found.");
 
-            if (movie != null)
-            {
-                _movies.Remove((Movie)movie);
-            }
+            _movies.Remove((Movie)movie);
+        }
+
+        private static void ValidateMovie(Movie movie)
+        {
+            var context = new ValidationContext(movie);
+            Validator.ValidateObject(movie, context, validateAllProperties: true);
         }
     }
 }

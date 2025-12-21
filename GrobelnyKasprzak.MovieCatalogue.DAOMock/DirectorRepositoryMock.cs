@@ -1,5 +1,6 @@
 ﻿using GrobelnyKasprzak.MovieCatalogue.DAOMock.Models;
 using GrobelnyKasprzak.MovieCatalogue.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
 namespace GrobelnyKasprzak.MovieCatalogue.DAOMock
 {
@@ -27,38 +28,54 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAOMock
 
         public IDirector CreateNew()
         {
-            return new Director { Name = "" };
+            return new Director();
         }
 
         public void Add(IDirector director)
         {
+            ArgumentNullException.ThrowIfNull(director);
+
             var newDirector = new Director
             {
                 Id = _nextId++,
                 Name = director.Name
             };
 
+            ValidateDirector(newDirector);
+
             _directors.Add(newDirector);
         }
 
+
         public void Update(IDirector director)
         {
-            var existing = GetById(director.Id);
+            ArgumentNullException.ThrowIfNull(director);
 
-            if (existing != null)
+            var existing = GetById(director.Id)
+                ?? throw new KeyNotFoundException($"Director with ID {director.Id} not found.");
+
+            var directorToUpdate = new Director
             {
-                existing.Name = director.Name;
-            }
+                Name = director.Name
+            };
+
+            ValidateDirector(director);
+
+            existing.Name = directorToUpdate.Name;
         }
 
         public void Delete(int id)
         {
-            var director = GetById(id);
+            var director = GetById(id)
+                ?? throw new KeyNotFoundException($"Director with ID {id} not found.");
 
-            if (director != null)
-            {
-                _directors.Remove((Director)director);
-            }
+            _directors.Remove((Director)director);
+        }
+
+        private static void ValidateDirector(IDirector director)
+        {
+            var context = new ValidationContext(director);
+            Validator.ValidateObject(director, context, validateAllProperties: true);
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using GrobelnyKasprzak.MovieCatalogue.Interfaces;
+using GrobelnyKasprzak.MovieCatalogue.MVC.Models.Dto;
 using GrobelnyKasprzak.MovieCatalogue.MVC.ViewModels;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace GrobelnyKasprzak.MovieCatalogue.MVC.Mappings;
 
@@ -8,17 +10,12 @@ public class DirectorProfile : Profile
 {
     public DirectorProfile()
     {
-        CreateMap<IDirector, DirectorViewModel>()
-            .ForMember(dest => dest.Movies, opt => opt.MapFrom((src, dest, _, ctx) =>
-            {
-                if (ctx.TryGetItems(out var items) &&
-                    items.TryGetValue(MappingKeys.Movies, out var moviesObj) &&
-                    moviesObj is IEnumerable<IMovie> movies)
-                {
-                    return ctx.Mapper.Map<IEnumerable<MovieListItemViewModel>>(movies);
-                }
+        CreateMap<DirectorViewModel, DirectorDto>();
 
-                return [];
-            }));
+        CreateMap<IDirector, DirectorViewModel>();
+
+        CreateMap<IDirector, SelectListItem>()
+            .ForMember(dest => dest.Value, opt => opt.MapFrom(src => src.Id.ToString()))
+            .ForMember(dest => dest.Text, opt => opt.MapFrom(src => src.Name));
     }
 }

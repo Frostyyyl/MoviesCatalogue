@@ -1,3 +1,5 @@
+using GrobelnyKasprzak.MovieCatalogue.MVC.Services;
+
 internal class Program
 {
     private static void Main(string[] args)
@@ -6,6 +8,7 @@ internal class Program
 
         // Add services to the container.
         builder.Services.AddControllersWithViews();
+        builder.Services.AddSingleton<ILookupService, LookupService>();
         builder.Services.AddAutoMapper(cfg =>
         {
             cfg.AddMaps(AppDomain.CurrentDomain.GetAssemblies());
