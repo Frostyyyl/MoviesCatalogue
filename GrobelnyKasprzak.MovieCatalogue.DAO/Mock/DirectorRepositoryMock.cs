@@ -1,8 +1,8 @@
-﻿using GrobelnyKasprzak.MovieCatalogue.DAOMock.Models;
+using GrobelnyKasprzak.MovieCatalogue.DAO.Mock.Models;
 using GrobelnyKasprzak.MovieCatalogue.Interfaces;
 using System.ComponentModel.DataAnnotations;
 
-namespace GrobelnyKasprzak.MovieCatalogue.DAOMock
+namespace GrobelnyKasprzak.MovieCatalogue.DAO.Mock
 {
     public class DirectorRepositoryMock : IDirectorRepository
     {
@@ -31,9 +31,11 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAOMock
 
         public void Add(IDirector director)
         {
+            int nextId = _directors.Count > 0 ? _directors.Max(d => d.Id) + 1 : 1;
+
             var newDirector = new Director
             {
-                Id = _nextId++,
+                Id = nextId,
                 Name = director.Name,
                 BirthYear = director.BirthYear
             };
@@ -41,6 +43,7 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAOMock
             ValidateDirector(newDirector);
 
             _directors.Add(newDirector);
+            director.Id = nextId;
         }
 
 

@@ -11,6 +11,6 @@ namespace GrobelnyKasprzak.MovieCatalogue.Interfaces
         void Update(IMovie movie);
         void Delete(int id);
         IMovie CreateNew();
-        bool Exists(string? title = null, int? year = null, MovieGenre? genre = null, int? directorId = null);
+        bool Exists(string? title = null, int? year = null, MovieGenre? genre = null, int? directorId = null, int? excludeId = null);
     }
 }

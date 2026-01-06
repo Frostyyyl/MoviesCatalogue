@@ -1,9 +1,9 @@
-﻿using GrobelnyKasprzak.MovieCatalogue.Core;
-using GrobelnyKasprzak.MovieCatalogue.DAOSql.Models;
+using GrobelnyKasprzak.MovieCatalogue.Core;
+using GrobelnyKasprzak.MovieCatalogue.DAO.Sql.Models;
 using GrobelnyKasprzak.MovieCatalogue.Interfaces;
 using System.ComponentModel.DataAnnotations;
 
-namespace GrobelnyKasprzak.MovieCatalogue.DAOSql
+namespace GrobelnyKasprzak.MovieCatalogue.DAO.Sql
 {
     public class MovieRepository(MovieCatalogueContext db) : IMovieRepository
     {
@@ -67,9 +67,12 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAOSql
             var context = new ValidationContext(movie);
             Validator.ValidateObject(movie, context, validateAllProperties: true);
         }
-        public bool Exists(string? title = null, int? year = null, MovieGenre? genre = null, int? directorId = null)
+        public bool Exists(string? title = null, int? year = null, MovieGenre? genre = null, int? directorId = null, int? excludeId = null)
         {
             var query = _db.Movies.AsQueryable();
+
+            if (excludeId.HasValue)
+                query = query.Where(m => m.Id != excludeId.Value);
 
             if (!string.IsNullOrEmpty(title))
                 query = query.Where(m => m.Title == title);

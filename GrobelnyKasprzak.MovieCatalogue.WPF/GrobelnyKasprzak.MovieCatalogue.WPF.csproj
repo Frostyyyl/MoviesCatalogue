@@ -1,34 +1,24 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net9.0-windows</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <UseWPF>true</UseWPF>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net9.0-windows</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UseWPF>true</UseWPF>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <None Remove="appsettings.json" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="appsettings.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\GrobelnyKasprzak.MovieCatalogue.Core\GrobelnyKasprzak.MovieCatalogue.Core.csproj" />
-    <ProjectReference Include="..\GrobelnyKasprzak.MovieCatalogue.Interfaces\GrobelnyKasprzak.MovieCatalogue.Interfaces.csproj" />
-    <ProjectReference Include="..\GrobelnyKasprzak.MovieCatalogue.Services\GrobelnyKasprzak.MovieCatalogue.Services.csproj" />
-  </ItemGroup>
-
-    <ItemGroup>
-		<None Include="..\GrobelnyKasprzak.MovieCatalogue.DAOMock\bin\Debug\net9.0\GrobelnyKasprzak.MovieCatalogue.DAOMock.dll">
-			<Link>GrobelnyKasprzak.MovieCatalogue.DAOMock.dll</Link>
+	<ItemGroup>
+		<ProjectReference Include="..\GrobelnyKasprzak.MovieCatalogue.Services\GrobelnyKasprzak.MovieCatalogue.Services.csproj" />
+		<None Update="appsettings.json">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
 
+	<Target Name="CopyCustomDLLs" AfterTargets="Build">
+		<ItemGroup>
+			<MyFiles Include="..\GrobelnyKasprzak.MovieCatalogue.DAO\bin\$(Configuration)\net9.0-windows\GrobelnyKasprzak.MovieCatalogue.DAO.dll" />
+		</ItemGroup>
+		<Copy SourceFiles="@(MyFiles)" DestinationFolder="$(OutputPath)" />
+	</Target>
 </Project>

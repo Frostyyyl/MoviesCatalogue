@@ -1,87 +1,33 @@
-﻿using GrobelnyKasprzak.MovieCatalogue.Core;
-using GrobelnyKasprzak.MovieCatalogue.Interfaces;
-using GrobelnyKasprzak.MovieCatalogue.Services;
-using System.Collections.ObjectModel;
-using System.Windows;
+﻿using GrobelnyKasprzak.MovieCatalogue.Interfaces;
 using GrobelnyKasprzak.MovieCatalogue.WPF.Commands;
+using GrobelnyKasprzak.MovieCatalogue.WPF.Models.Dto;
+using System;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Linq;
+using System.Windows;
+using System.Windows.Data;
+using System.Windows.Input;
 
 namespace GrobelnyKasprzak.MovieCatalogue.WPF.ViewModels
 {
-    public class MoviesViewModel : ViewModel
+    public class MoviesViewModel : ViewModel, IDataErrorInfo
     {
-        private readonly MovieService _movieService;
-        private readonly DirectorService _directorService;
+        private readonly IMovieService _movieService;
+        private readonly IDirectorService _directorService;
+        private readonly ICollectionView _moviesView;
+        private bool _editTitleTouched;
+        private bool _editYearTouched;
+        private bool _newTitleTouched;
+        private bool _newYearTouched;
+        public ICommand UpdateCommand { get; }
+        public ICommand CreateCommand { get; }
+        public ICommand DeleteCommand { get; }
+        public ObservableCollection<MovieDto> Movies { get; }
+        public ObservableCollection<DirectorDto> Directors { get; }
 
-        // Fields
-        private ObservableCollection<IMovie> _movies = new();
-        private ObservableCollection<IMovie> _allMovies = new();
-
-        private IMovie? _selectedMovie;
+        // State and search
         private string _searchText = string.Empty;
-        private string _selectedGenreFilter = "All";
-
-        private string _title = string.Empty;
-        private string _yearText = string.Empty;
-        private MovieGenre _genre = MovieGenre.Action;
-        private IDirector? _selectedDirector;
-
-        private string _titleError = string.Empty;
-        private string _yearError = string.Empty;
-        private string _directorError = string.Empty;
-
-        // Constructor
-        public MoviesViewModel(MovieService movieService, DirectorService directorService)
-        {
-            _movieService = movieService;
-            _directorService = directorService;
-
-            AddCommand = new RelayCommand(_ => AddMovie(), _ => CanAddMovie());
-            UpdateCommand = new RelayCommand(_ => UpdateMovie(), _ => CanUpdateMovie());
-            DeleteCommand = new RelayCommand(_ => DeleteMovie(), _ => CanDeleteMovie());
-
-            LoadMovies();
-        }
-
-        // Properties for data binding
-        public ObservableCollection<IMovie> Movies
-        {
-            get => _movies;
-            set { _movies = value; OnPropertyChanged(); }
-        }
-
-        public ObservableCollection<IDirector> Directors
-        {
-            get
-            {
-                var directors = new ObservableCollection<IDirector>();
-                foreach (var d in _directorService.GetAllDirectors())
-                    directors.Add(d);
-                return directors;
-            }
-        }
-
-        public IMovie? SelectedMovie
-        {
-            get => _selectedMovie;
-            set
-            {
-                _selectedMovie = value;
-                OnPropertyChanged();
-                
-                if (value != null)
-                {
-                    Title = value.Title;
-                    YearText = value.Year.ToString();
-                    Genre = value.Genre;
-                    SelectedDirector = Directors.FirstOrDefault(d => d.Id == value.DirectorId);
-                }
-                else
-                {
-                    ClearForm();
-                }
-            }
-        }
-
         public string SearchText
         {
             get => _searchText;
@@ -89,265 +35,212 @@ namespace GrobelnyKasprzak.MovieCatalogue.WPF.ViewModels
             {
                 _searchText = value;
                 OnPropertyChanged();
-                FilterMovies();
+                _moviesView.Refresh();
             }
         }
 
-        public string SelectedGenreFilter
+        private int _selectedTabIndex;
+        public int SelectedTabIndex
         {
-            get => _selectedGenreFilter;
+            get => _selectedTabIndex;
             set
             {
-                _selectedGenreFilter = value;
+                _selectedTabIndex = value;
                 OnPropertyChanged();
-                FilterMovies();
+                SelectedMovie = null;
+                ResetForms();
             }
         }
 
-        public string Title
+        private MovieDto? _selectedMovie;
+        public MovieDto? SelectedMovie
         {
-            get => _title;
+            get => _selectedMovie;
             set
             {
-                _title = value;
+                _selectedMovie = value;
                 OnPropertyChanged();
-                ValidateTitle();
-            }
-        }
-
-        public string YearText
-        {
-            get => _yearText;
-            set
-            {
-                // Only allow numbers
-                if (string.IsNullOrEmpty(value) || int.TryParse(value, out _))
+                if (_selectedMovie != null)
                 {
-                    _yearText = value;
-                    OnPropertyChanged();
-                    ValidateYear();
+                    EditTitle = _selectedMovie.Title;
+                    EditYear = _selectedMovie.Year;
+                    EditDirectorId = _selectedMovie.DirectorId;
+                    _editTitleTouched = false;
+                    _editYearTouched = false;
                 }
+                CommandManager.InvalidateRequerySuggested();
             }
         }
 
-        public MovieGenre Genre
+        // Form (Edit)
+        private string _editTitle = string.Empty;
+        public string EditTitle { get => _editTitle; set { _editTitle = value; _editTitleTouched = true; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); } }
+
+        private int? _editYear;
+        public int? EditYear { get => _editYear; set { _editYear = value; _editYearTouched = true; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); } }
+
+        private int? _editDirectorId;
+        public int? EditDirectorId { get => _editDirectorId; set { _editDirectorId = value; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); } }
+
+        // Form (New)
+        private string _newTitle = string.Empty;
+        public string NewTitle { get => _newTitle; set { _newTitle = value; _newTitleTouched = true; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); } }
+
+        private int? _newYear;
+        public int? NewYear { get => _newYear; set { _newYear = value; _newYearTouched = true; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); } }
+
+        private int? _newDirectorId;
+        public int? NewDirectorId { get => _newDirectorId; set { _newDirectorId = value; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); } }
+
+        // Constructor
+        public MoviesViewModel(IMovieService movieService, IDirectorService directorService)
         {
-            get => _genre;
-            set { _genre = value; OnPropertyChanged(); }
+            _movieService = movieService;
+            _directorService = directorService;
+
+            Directors = new ObservableCollection<DirectorDto>();
+            Movies = new ObservableCollection<MovieDto>();
+
+            _moviesView = CollectionViewSource.GetDefaultView(Movies);
+            _moviesView.Filter = FilterMovies;
+
+            RefreshDirectorsData();
+            RefreshMoviesData();
+
+            DirectorsViewModel.DirectorsChanged += () => Application.Current.Dispatcher.Invoke(RefreshDirectorsData);
+
+            UpdateCommand = new RelayCommand(UpdateMovie, _ => SelectedMovie != null && IsEditValid);
+            CreateCommand = new RelayCommand(CreateMovie, _ => IsNewValid);
+            DeleteCommand = new RelayCommand(DeleteMovie, _ => SelectedMovie != null);
         }
 
-        public IDirector? SelectedDirector
+        private bool FilterMovies(object obj)
         {
-            get => _selectedDirector;
-            set
+            if (obj is not MovieDto movie) return false;
+            if (string.IsNullOrWhiteSpace(SearchText)) return true;
+
+            return movie.Title.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ||
+                   movie.DirectorName.Contains(SearchText, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private void ResetForms()
+        {
+            _newTitleTouched = _newYearTouched = _editTitleTouched = _editYearTouched = false;
+            NewTitle = string.Empty;
+            NewYear = null;
+            NewDirectorId = null;
+            EditTitle = string.Empty;
+            EditYear = null;
+            EditDirectorId = null;
+            OnPropertyChanged(string.Empty);
+        }
+
+        private void RefreshDirectorsData()
+        {
+            var data = _directorService.GetAllDirectors().Select(d => new DirectorDto { Id = d.Id, Name = d.Name }).ToList();
+            Directors.Clear();
+            foreach (var d in data) Directors.Add(d);
+        }
+
+        private void RefreshMoviesData()
+        {
+            var dict = _directorService.GetAllDirectors().ToDictionary(d => d.Id, d => d.Name);
+            var data = _movieService.GetAllMovies().Select(m => new MovieDto
             {
-                _selectedDirector = value;
-                OnPropertyChanged();
-                ValidateDirector();
-            }
-        }
-
-        // Error properties
-        public string TitleError
-        {
-            get => _titleError;
-            set { _titleError = value; OnPropertyChanged(); OnPropertyChanged(nameof(HasTitleError)); }
-        }
-
-        public string YearError
-        {
-            get => _yearError;
-            set { _yearError = value; OnPropertyChanged(); OnPropertyChanged(nameof(HasYearError)); }
-        }
-
-        public string DirectorError
-        {
-            get => _directorError;
-            set { _directorError = value; OnPropertyChanged(); OnPropertyChanged(nameof(HasDirectorError)); }
-        }
-
-        public bool HasTitleError => !string.IsNullOrEmpty(TitleError);
-        public bool HasYearError => !string.IsNullOrEmpty(YearError);
-        public bool HasDirectorError => !string.IsNullOrEmpty(DirectorError);
-
-        // Lists for ComboBoxes
-        public Array Genres => Enum.GetValues(typeof(MovieGenre));
-
-        public ObservableCollection<string> GenresWithAll
-        {
-            get
-            {
-                var list = new ObservableCollection<string> { "All" };
-                foreach (var genre in Enum.GetNames(typeof(MovieGenre)))
-                    list.Add(genre);
-                return list;
-            }
-        }
-
-        // Commands
-        public RelayCommand AddCommand { get; }
-        public RelayCommand UpdateCommand { get; }
-        public RelayCommand DeleteCommand { get; }
-
-        // Validation methods
-        private void ValidateTitle()
-        {
-            TitleError = string.IsNullOrWhiteSpace(Title) ? "Title is required" : string.Empty;
-        }
-
-        private void ValidateYear()
-        {
-            if (string.IsNullOrWhiteSpace(YearText))
-            {
-                YearError = "Year is required";
-                return;
-            }
-
-            if (!int.TryParse(YearText, out int year))
-            {
-                YearError = "Invalid year";
-                return;
-            }
-
-            if (year < 1895)
-            {
-                YearError = "Year must be >= 1895";
-                return;
-            }
-
-            if (year > DateTime.Now.Year + 10)
-            {
-                YearError = $"Year must be <= {DateTime.Now.Year + 10}";
-                return;
-            }
-
-            YearError = string.Empty;
-        }
-
-        private void ValidateDirector()
-        {
-            DirectorError = SelectedDirector == null ? "Director is required" : string.Empty;
-        }
-
-        // Data operations
-        private void LoadMovies()
-        {
-            _allMovies.Clear();
-            foreach (var movie in _movieService.GetAllMovies())
-                _allMovies.Add(movie);
-            FilterMovies();
-        }
-
-        private void FilterMovies()
-        {
+                Id = m.Id,
+                Title = m.Title,
+                Year = m.Year,
+                DirectorId = m.DirectorId,
+                DirectorName = dict.TryGetValue(m.DirectorId, out var n) ? n : "Unknown"
+            }).ToList();
             Movies.Clear();
-            var filtered = _allMovies.AsEnumerable();
-
-            // Filter by search text
-            if (!string.IsNullOrWhiteSpace(SearchText))
-                filtered = filtered.Where(m => m.Title.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
-
-            // Filter by genre
-            if (SelectedGenreFilter != "All" && Enum.TryParse<MovieGenre>(SelectedGenreFilter, out var genreFilter))
-                filtered = filtered.Where(m => m.Genre == genreFilter);
-
-            foreach (var movie in filtered)
-                Movies.Add(movie);
+            foreach (var m in data) Movies.Add(m);
         }
 
-        private bool CanAddMovie()
-        {
-            return string.IsNullOrEmpty(TitleError) &&
-                   string.IsNullOrEmpty(YearError) &&
-                   string.IsNullOrEmpty(DirectorError) &&
-                   !string.IsNullOrWhiteSpace(Title) &&
-                   !string.IsNullOrWhiteSpace(YearText) &&
-                   SelectedDirector != null;
-        }
-
-        private void AddMovie()
+        // CRUD
+        private void CreateMovie(object? _)
         {
             try
             {
                 var movie = _movieService.CreateNewMovie();
-                movie.Title = Title;
-                movie.Year = int.Parse(YearText);
-                movie.Genre = Genre;
-                movie.DirectorId = SelectedDirector!.Id;
-
+                movie.Title = NewTitle;
+                movie.Year = NewYear ?? 0;
+                movie.DirectorId = NewDirectorId ?? 0;
                 _movieService.AddMovie(movie);
-                LoadMovies();
-                ClearForm();
-                MessageBox.Show("Movie added successfully", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                RefreshMoviesData();
+                ResetForms();
+                MessageBox.Show("Movie added successfully!");
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            catch (Exception ex) { MessageBox.Show(ex.Message); }
         }
 
-        private bool CanUpdateMovie()
+        private void UpdateMovie(object? _)
         {
-            return SelectedMovie != null && CanAddMovie();
-        }
-
-        private void UpdateMovie()
-        {
+            if (SelectedMovie == null) return;
             try
             {
-                if (SelectedMovie == null) return;
-
-                SelectedMovie.Title = Title;
-                SelectedMovie.Year = int.Parse(YearText);
-                SelectedMovie.Genre = Genre;
-                SelectedMovie.DirectorId = SelectedDirector!.Id;
-
-                _movieService.UpdateMovie(SelectedMovie);
-                LoadMovies();
-                ClearForm();
-                MessageBox.Show("Movie updated successfully", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private bool CanDeleteMovie() => SelectedMovie != null;
-
-        private void DeleteMovie()
-        {
-            try
-            {
-                if (SelectedMovie == null) return;
-
-                var result = MessageBox.Show(
-                    $"Delete '{SelectedMovie.Title}'?",
-                    "Confirm Delete",
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Question);
-
-                if (result == MessageBoxResult.Yes)
+                var movie = _movieService.GetMovieById(SelectedMovie.Id);
+                if (movie != null)
                 {
-                    _movieService.DeleteMovie(SelectedMovie.Id);
-                    LoadMovies();
-                    ClearForm();
-                    MessageBox.Show("Movie deleted successfully", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                    movie.Title = EditTitle;
+                    movie.Year = EditYear ?? 0;
+                    movie.DirectorId = EditDirectorId ?? 0;
+                    _movieService.UpdateMovie(movie);
+                    RefreshMoviesData();
+                    MessageBox.Show("Updated successfully!");
                 }
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            catch (Exception ex) { MessageBox.Show(ex.Message); }
         }
 
-        private void ClearForm()
+        private void DeleteMovie(object? _)
         {
-            Title = string.Empty;
-            YearText = string.Empty;
-            Genre = MovieGenre.Action;
-            SelectedDirector = null;
-            SelectedMovie = null;
+            if (SelectedMovie == null) return;
+            try
+            {
+                _movieService.DeleteMovie(SelectedMovie.Id);
+                Movies.Remove(SelectedMovie);
+                SelectedMovie = null;
+                ResetForms();
+            }
+            catch (Exception ex) { MessageBox.Show(ex.Message); }
+        }
+
+        // Validation
+        public bool IsEditValid => !string.IsNullOrWhiteSpace(EditTitle) && EditYear >= 1850 && EditYear <= 2026 && EditDirectorId > 0;
+        public bool IsNewValid => !string.IsNullOrWhiteSpace(NewTitle) && NewYear >= 1850 && NewYear <= 2026 && NewDirectorId > 0;
+
+        public string Error => string.Empty;
+        public string this[string columnName]
+        {
+            get
+            {
+                if (columnName == nameof(NewTitle))
+                {
+                    if (!_newTitleTouched) return string.Empty;
+                    if (string.IsNullOrWhiteSpace(NewTitle)) return "Title is required.";
+                }
+                if (columnName == nameof(NewYear))
+                {
+                    if (!_newYearTouched) return string.Empty;
+                    if (NewYear == null) return "Year is required.";
+                    if (NewYear < 1850 || NewYear > 2026) return "Year must be 1850-2026.";
+                }
+
+                if (columnName == nameof(EditTitle))
+                {
+                    if (!_editTitleTouched) return string.Empty;
+                    if (string.IsNullOrWhiteSpace(EditTitle)) return "Title is required.";
+                }
+                if (columnName == nameof(EditYear))
+                {
+                    if (!_editYearTouched) return string.Empty;
+                    if (EditYear == null) return "Year is required.";
+                    if (EditYear < 1850 || EditYear > 2026) return "Year must be 1850-2026.";
+                }
+                return string.Empty;
+            }
         }
     }
 }

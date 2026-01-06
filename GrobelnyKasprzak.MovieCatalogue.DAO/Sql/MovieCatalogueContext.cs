@@ -1,17 +1,17 @@
-﻿using GrobelnyKasprzak.MovieCatalogue.DAOSql.Models;
+using GrobelnyKasprzak.MovieCatalogue.DAO.Sql.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace GrobelnyKasprzak.MovieCatalogue.DAOSql
+namespace GrobelnyKasprzak.MovieCatalogue.DAO.Sql
 {
     public class MovieCatalogueContext : DbContext
     {
         public DbSet<Movie> Movies { get; set; }
         public DbSet<Director> Directors { get; set; }
 
-        //public MovieCatalogueContext(DbContextOptions<MovieCatalogueContext> options) : base(options)
-        //{
-        //    Database.EnsureCreated();
-        //}
+        public MovieCatalogueContext()
+        {
+            Database.EnsureCreated();
+        }
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
@@ -35,5 +35,4 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAOSql
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }
-
 }

@@ -1,9 +1,9 @@
-﻿using GrobelnyKasprzak.MovieCatalogue.Core;
-using GrobelnyKasprzak.MovieCatalogue.DAOMock.Models;
+using GrobelnyKasprzak.MovieCatalogue.Core;
+using GrobelnyKasprzak.MovieCatalogue.DAO.Mock.Models;
 using GrobelnyKasprzak.MovieCatalogue.Interfaces;
 using System.ComponentModel.DataAnnotations;
 
-namespace GrobelnyKasprzak.MovieCatalogue.DAOMock
+namespace GrobelnyKasprzak.MovieCatalogue.DAO.Mock
 {
     public class MovieRepositoryMock : IMovieRepository
     {
@@ -70,9 +70,10 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAOMock
             _movies.Remove((Movie)movie);
         }
 
-        public bool Exists(string? title = null, int? year = null, MovieGenre? genre = null, int? directorId = null)
+        public bool Exists(string? title = null, int? year = null, MovieGenre? genre = null, int? directorId = null, int? excludeId = null)
         {
             return _movies.Any(m =>
+                (excludeId == null || m.Id != excludeId) &&
                 (title == null || m.Title == title) &&
                 (year == null || m.Year == year) &&
                 (genre == null || m.Genre == genre) &&

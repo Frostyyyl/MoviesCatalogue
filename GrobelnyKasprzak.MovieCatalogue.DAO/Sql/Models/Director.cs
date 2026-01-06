@@ -1,7 +1,7 @@
-﻿using GrobelnyKasprzak.MovieCatalogue.Interfaces;
+using GrobelnyKasprzak.MovieCatalogue.Interfaces;
 using System.ComponentModel.DataAnnotations;
 
-namespace GrobelnyKasprzak.MovieCatalogue.DAOMock.Models
+namespace GrobelnyKasprzak.MovieCatalogue.DAO.Sql.Models
 {
     public class Director : IDirector
     {
@@ -13,5 +13,6 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAOMock.Models
         [Required(ErrorMessage = "Director year of birth is required")]
         [Range(1800, int.MaxValue, ErrorMessage = "Year of birth must be 1800 or later")]
         public int BirthYear { get; set; }
+        public ICollection<Movie> Movies { get; set; } = [];
     }
 }

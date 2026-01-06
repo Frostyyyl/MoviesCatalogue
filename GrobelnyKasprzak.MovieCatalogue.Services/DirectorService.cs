@@ -20,15 +20,22 @@ namespace GrobelnyKasprzak.MovieCatalogue.Services
 
             _directorRepository.Add(director);
         }
+
         public void UpdateDirector(IDirector director)
         {
-            if (_directorRepository.Exists(name: director.Name, birthYear: director.BirthYear))
+            var isDuplicate = _directorRepository.GetAll()
+                .Any(d => d.Name == director.Name &&
+                          d.BirthYear == director.BirthYear &&
+                          d.Id != director.Id);
+
+            if (isDuplicate)
             {
-                throw new InvalidOperationException("This director is already in the system.");
+                throw new InvalidOperationException("Another director with the same details already exists.");
             }
 
             _directorRepository.Update(director);
         }
+
         public void DeleteDirector(int id)
         {
             var hasMovies = _movieRepository.GetByDirectorId(id).Any();

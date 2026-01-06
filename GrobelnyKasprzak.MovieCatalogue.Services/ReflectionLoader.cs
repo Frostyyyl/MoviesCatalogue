@@ -1,61 +1,47 @@
 ﻿using GrobelnyKasprzak.MovieCatalogue.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Runtime.Loader;
 
 namespace GrobelnyKasprzak.MovieCatalogue.Services
 {
-    public class ReflectionLoader
+    public static class ReflectionLoader
     {
-        private readonly Assembly _daoAssembly;
-        public ReflectionLoader()
+        public static void RegisterDao(IServiceCollection services, IConfiguration config)
         {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+            string activeDao = config["DaoConfig:ActiveDao"] ?? throw new Exception("Brak ActiveDao");
+            string dllName = config[$"DaoConfig:{activeDao}:Dll"] ?? throw new Exception("Brak Dll");
+            string className = config[$"DaoConfig:{activeDao}:Class"] ?? throw new Exception("Brak Class");
 
-            IConfiguration config = builder.Build();
+            string fullPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, dllName);
 
-            string? dllName = config["AppSettings:DaoLibrary"];
+            if (!File.Exists(fullPath))
+                throw new FileNotFoundException($"Brak pliku: {fullPath}");
 
-            if (string.IsNullOrEmpty(dllName))
+            var resolver = new AssemblyDependencyResolver(fullPath);
+            AssemblyLoadContext.Default.Resolving += (context, assemblyName) =>
             {
-                throw new Exception("Nie skonfigurowano nazwy biblioteki DAO w appsettings.json");
-            }
+                string? assemblyPath = resolver.ResolveAssemblyToPath(assemblyName);
+                return assemblyPath != null ? context.LoadFromAssemblyPath(assemblyPath) : null;
+            };
 
-            string path = AppDomain.CurrentDomain.BaseDirectory;
-            string fullPath = Path.Combine(path, dllName);
-
-            if (File.Exists(fullPath))
+            AssemblyLoadContext.Default.ResolvingUnmanagedDll += (managedAssembly, unmanagedDllName) =>
             {
-                _daoAssembly = Assembly.LoadFrom(fullPath);
-            }
-            else
-            {
-                throw new FileNotFoundException($"Nie znaleziono pliku biblioteki: {fullPath}");
-            }
-        }
+                string? libraryPath = resolver.ResolveUnmanagedDllToPath(unmanagedDllName);
+                return libraryPath != null ? NativeLibrary.Load(libraryPath) : IntPtr.Zero;
+            };
 
-        public void Register(IServiceCollection services)
-        {
-            var moduleType = _daoAssembly.GetTypes()
-                .FirstOrDefault(t => typeof(IDaoModule).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract);
+            Assembly daoAssembly = Assembly.LoadFrom(fullPath);
+            Type? moduleType = daoAssembly.GetType(className);
 
-            if (moduleType == null)
-            {
-                throw new Exception($"Nie znaleziono implementacji {nameof(IDaoModule)} w bibliotece.");
-            }
+            if (moduleType == null || !typeof(IDaoModule).IsAssignableFrom(moduleType))
+                throw new Exception($"Klasa {className} nie implementuje IDaoModule.");
 
-            var instance = Activator.CreateInstance(moduleType);
-
-            if (instance is IDaoModule module)
-            {
-                module.RegisterServices(services);
-            }
-            else
-            {
-                throw new Exception($"Nie udało się utworzyć instancji {moduleType.Name}.");
-            }
+            var instance = Activator.CreateInstance(moduleType) as IDaoModule;
+            instance?.RegisterServices(services);
         }
     }
 }

@@ -25,7 +25,7 @@ namespace GrobelnyKasprzak.MovieCatalogue.Services
 
         public void UpdateMovie(IMovie movie)
         {
-            if (_repo.Exists(title: movie.Title, year: movie.Year, directorId: movie.DirectorId))
+            if (_repo.Exists(title: movie.Title, year: movie.Year, directorId: movie.DirectorId, excludeId: movie.Id))
             {
                 throw new InvalidOperationException($"This movie already exists for this director in the year {movie.Year}.");
             }

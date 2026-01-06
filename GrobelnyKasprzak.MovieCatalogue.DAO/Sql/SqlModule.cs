@@ -1,7 +1,7 @@
-﻿using GrobelnyKasprzak.MovieCatalogue.Interfaces;
+using GrobelnyKasprzak.MovieCatalogue.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace GrobelnyKasprzak.MovieCatalogue.DAOSql;
+namespace GrobelnyKasprzak.MovieCatalogue.DAO.Sql;
 
 public class SqlModule : IDaoModule
 {

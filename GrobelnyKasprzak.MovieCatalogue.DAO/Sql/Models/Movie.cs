@@ -1,9 +1,9 @@
-﻿using GrobelnyKasprzak.MovieCatalogue.Core;
+using GrobelnyKasprzak.MovieCatalogue.Core;
 using GrobelnyKasprzak.MovieCatalogue.Interfaces;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace GrobelnyKasprzak.MovieCatalogue.DAOSql.Models
+namespace GrobelnyKasprzak.MovieCatalogue.DAO.Sql.Models
 {
     public class Movie : IMovie
     {

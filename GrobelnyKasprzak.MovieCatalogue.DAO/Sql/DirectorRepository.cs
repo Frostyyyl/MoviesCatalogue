@@ -1,8 +1,8 @@
-﻿using GrobelnyKasprzak.MovieCatalogue.DAOSql.Models;
+using GrobelnyKasprzak.MovieCatalogue.DAO.Sql.Models;
 using GrobelnyKasprzak.MovieCatalogue.Interfaces;
 using System.ComponentModel.DataAnnotations;
 
-namespace GrobelnyKasprzak.MovieCatalogue.DAOSql
+namespace GrobelnyKasprzak.MovieCatalogue.DAO.Sql
 {
     public class DirectorRepository(MovieCatalogueContext db) : IDirectorRepository
     {

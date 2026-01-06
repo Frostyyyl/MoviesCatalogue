@@ -1,280 +1,79 @@
 ﻿<Window x:Class="GrobelnyKasprzak.MovieCatalogue.WPF.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="clr-namespace:GrobelnyKasprzak.MovieCatalogue.WPF.ViewModels"
-        Title="Movie Catalogue" Height="650" Width="1100"
-        WindowStartupLocation="CenterScreen"
-        Background="#F5F5F5">
+        xmlns:views="clr-namespace:GrobelnyKasprzak.MovieCatalogue.WPF.Views"
+        Title="Movie Catalogue"
+        Height="700"
+        Width="1200"
+        Background="#FFFAFAFA"
+        WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
-        <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+        <SolidColorBrush x:Key="PrimaryYellow" Color="#FFC107"/>
+        <SolidColorBrush x:Key="DarkText" Color="#333333"/>
+        <SolidColorBrush x:Key="BgCream" Color="#FFFAFAFA"/>
 
-        <!-- Colors -->
-        <SolidColorBrush x:Key="PrimaryColor" Color="#FFC107"/>
-        <SolidColorBrush x:Key="PrimaryDark" Color="#FFA000"/>
-        <SolidColorBrush x:Key="ErrorColor" Color="#F44336"/>
-        <SolidColorBrush x:Key="TextColor" Color="#212121"/>
-
-        <!-- TextBox Style -->
-        <Style x:Key="TextBoxStyle" TargetType="TextBox">
-            <Setter Property="Padding" Value="8"/>
-            <Setter Property="FontSize" Value="12"/>
-            <Setter Property="BorderBrush" Value="#CCCCCC"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Height" Value="30"/>
-        </Style>
-
-        <!-- ComboBox Style -->
-        <Style x:Key="ComboBoxStyle" TargetType="ComboBox">
-            <Setter Property="Padding" Value="8"/>
-            <Setter Property="FontSize" Value="12"/>
-            <Setter Property="Height" Value="30"/>
-        </Style>
-
-        <!-- Button Style -->
-        <Style x:Key="ButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="{StaticResource PrimaryColor}"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FontSize" Value="12"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Padding" Value="16,8"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Cursor" Value="Hand"/>
+        <Style TargetType="TabItem">
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="Padding" Value="25,12"/>
+            <Setter Property="Foreground" Value="Gray"/>
             <Setter Property="Template">
                 <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" 
-                                CornerRadius="3" 
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border Name="TabBorder" 
+                                BorderThickness="0,0,0,4" 
+                                BorderBrush="Transparent" 
+                                Background="Transparent"
+                                Margin="5,0">
+                            <ContentPresenter x:Name="ContentSite"
+                                              VerticalAlignment="Center"
+                                              HorizontalAlignment="Center"
+                                              ContentSource="Header"
+                                              Margin="{TemplateBinding Padding}"/>
                         </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="TabBorder" Property="BorderBrush" Value="{StaticResource PrimaryYellow}"/>
+                                <Setter Property="Foreground" Value="{StaticResource PrimaryYellow}"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Foreground" Value="#FFD54F"/>
+                                <Setter Property="Cursor" Value="Hand"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="{StaticResource PrimaryDark}"/>
-                </Trigger>
-                <Trigger Property="IsEnabled" Value="False">
-                    <Setter Property="Background" Value="#CCCCCC"/>
-                    <Setter Property="Cursor" Value="Arrow"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-
-        <!-- Delete Button Style -->
-        <Style x:Key="DeleteButtonStyle" TargetType="Button" BasedOn="{StaticResource ButtonStyle}">
-            <Setter Property="Background" Value="{StaticResource ErrorColor}"/>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#D32F2F"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-
-        <!-- Error Text Style -->
-        <Style x:Key="ErrorTextStyle" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{StaticResource ErrorColor}"/>
-            <Setter Property="FontSize" Value="11"/>
-            <Setter Property="Margin" Value="0,2,0,0"/>
-        </Style>
-
-        <!-- Label Style -->
-        <Style x:Key="LabelStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="12"/>
-            <Setter Property="Margin" Value="0,0,0,4"/>
-            <Setter Property="FontWeight" Value="Medium"/>
         </Style>
     </Window.Resources>
 
-    <Window.DataContext>
-        <vm:MainViewModel />
-    </Window.DataContext>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-    <Grid Margin="10">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="2*"/>
-            <ColumnDefinition Width="10"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+        <Border Grid.Row="0" Background="White" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="20,10">
+            <TextBlock Text="MOVIE CATALOGUE" 
+                       FontSize="20" 
+                       FontWeight="ExtraBlack" 
+                       Foreground="{StaticResource PrimaryYellow}" />
+        </Border>
 
-        <!-- MOVIES SECTION -->
-        <GroupBox Grid.Column="0" Header="Movies" Padding="10">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+        <TabControl Grid.Row="1" 
+                    Background="Transparent" 
+                    BorderThickness="0" 
+                    Margin="10">
 
-                <!-- Search and Filter -->
-                <StackPanel Grid.Row="0" Margin="0,0,0,10">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="2*"/>
-                            <ColumnDefinition Width="10"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+            <TabItem Header="MOVIES">
+                <views:MoviesView DataContext="{Binding MoviesVM}" />
+            </TabItem>
 
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="Search:" Style="{StaticResource LabelStyle}"/>
-                            <TextBox Style="{StaticResource TextBoxStyle}"
-                                     Text="{Binding MoviesVM.SearchText, UpdateSourceTrigger=PropertyChanged}"/>
-                        </StackPanel>
+            <TabItem Header="DIRECTORS">
+                <views:DirectorsView DataContext="{Binding DirectorsVM}" />
+            </TabItem>
 
-                        <StackPanel Grid.Column="2">
-                            <TextBlock Text="Genre:" Style="{StaticResource LabelStyle}"/>
-                            <ComboBox Style="{StaticResource ComboBoxStyle}"
-                                      ItemsSource="{Binding MoviesVM.GenresWithAll}"
-                                      SelectedItem="{Binding MoviesVM.SelectedGenreFilter}"/>
-                        </StackPanel>
-                    </Grid>
-                </StackPanel>
-
-                <!-- Form -->
-                <Border Grid.Row="1" Background="White" Padding="10" Margin="0,0,0,10" 
-                        BorderBrush="#DDDDDD" BorderThickness="1" CornerRadius="3">
-                    <StackPanel>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="2*"/>
-                                <ColumnDefinition Width="10"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="10"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <!-- Title -->
-                            <StackPanel Grid.Column="0">
-                                <TextBlock Text="Title:" Style="{StaticResource LabelStyle}"/>
-                                <TextBox Style="{StaticResource TextBoxStyle}"
-                                         Text="{Binding MoviesVM.Title, UpdateSourceTrigger=PropertyChanged}"/>
-                                <TextBlock Style="{StaticResource ErrorTextStyle}"
-                                           Text="{Binding MoviesVM.TitleError}"
-                                           Visibility="{Binding MoviesVM.HasTitleError, Converter={StaticResource BoolToVisibility}}"/>
-                            </StackPanel>
-
-                            <!-- Year -->
-                            <StackPanel Grid.Column="2">
-                                <TextBlock Text="Year:" Style="{StaticResource LabelStyle}"/>
-                                <TextBox Style="{StaticResource TextBoxStyle}"
-                                         Text="{Binding MoviesVM.YearText, UpdateSourceTrigger=PropertyChanged}"
-                                         MaxLength="4"/>
-                                <TextBlock Style="{StaticResource ErrorTextStyle}"
-                                           Text="{Binding MoviesVM.YearError}"
-                                           Visibility="{Binding MoviesVM.HasYearError, Converter={StaticResource BoolToVisibility}}"/>
-                            </StackPanel>
-
-                            <!-- Genre -->
-                            <StackPanel Grid.Column="4">
-                                <TextBlock Text="Genre:" Style="{StaticResource LabelStyle}"/>
-                                <ComboBox Style="{StaticResource ComboBoxStyle}"
-                                          ItemsSource="{Binding MoviesVM.Genres}"
-                                          SelectedItem="{Binding MoviesVM.Genre}"/>
-                            </StackPanel>
-                        </Grid>
-
-                        <!-- Director -->
-                        <StackPanel Margin="0,10,0,0">
-                            <TextBlock Text="Director:" Style="{StaticResource LabelStyle}"/>
-                            <ComboBox Style="{StaticResource ComboBoxStyle}"
-                                      ItemsSource="{Binding DirectorsVM.Directors}"
-                                      SelectedItem="{Binding MoviesVM.SelectedDirector}"
-                                      DisplayMemberPath="Name"/>
-                            <TextBlock Style="{StaticResource ErrorTextStyle}"
-                                       Text="{Binding MoviesVM.DirectorError}"
-                                       Visibility="{Binding MoviesVM.HasDirectorError, Converter={StaticResource BoolToVisibility}}"/>
-                        </StackPanel>
-
-                        <!-- Buttons -->
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,15,0,0">
-                            <Button Content="Add" Command="{Binding MoviesVM.AddCommand}"
-                                    Style="{StaticResource ButtonStyle}" Width="80" Margin="5,0"/>
-                            <Button Content="Update" Command="{Binding MoviesVM.UpdateCommand}"
-                                    Style="{StaticResource ButtonStyle}" Width="80" Margin="5,0"/>
-                            <Button Content="Delete" Command="{Binding MoviesVM.DeleteCommand}"
-                                    Style="{StaticResource DeleteButtonStyle}" Width="80" Margin="5,0"/>
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-
-                <!-- Movies List -->
-                <DataGrid Grid.Row="2"
-                          ItemsSource="{Binding MoviesVM.Movies}"
-                          SelectedItem="{Binding MoviesVM.SelectedMovie}"
-                          AutoGenerateColumns="False"
-                          IsReadOnly="True"
-                          SelectionMode="Single"
-                          CanUserAddRows="False"
-                          GridLinesVisibility="None"
-                          AlternatingRowBackground="#F5F5F5"
-                          HeadersVisibility="Column">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
-                        <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="*"/>
-                        <DataGridTextColumn Header="Year" Binding="{Binding Year}" Width="70"/>
-                        <DataGridTextColumn Header="Genre" Binding="{Binding Genre}" Width="100"/>
-                        <DataGridTextColumn Header="Director ID" Binding="{Binding DirectorId}" Width="90"/>
-                    </DataGrid.Columns>
-                </DataGrid>
-            </Grid>
-        </GroupBox>
-
-        <!-- DIRECTORS SECTION -->
-        <GroupBox Grid.Column="2" Header="Directors" Padding="10">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-
-                <!-- Search -->
-                <StackPanel Grid.Row="0" Margin="0,0,0,10">
-                    <TextBlock Text="Search:" Style="{StaticResource LabelStyle}"/>
-                    <TextBox Style="{StaticResource TextBoxStyle}"
-                             Text="{Binding DirectorsVM.SearchText, UpdateSourceTrigger=PropertyChanged}"/>
-                </StackPanel>
-
-                <!-- Form -->
-                <Border Grid.Row="1" Background="White" Padding="10" Margin="0,0,0,10"
-                        BorderBrush="#DDDDDD" BorderThickness="1" CornerRadius="3">
-                    <StackPanel>
-                        <TextBlock Text="Name:" Style="{StaticResource LabelStyle}"/>
-                        <TextBox Style="{StaticResource TextBoxStyle}"
-                                 Text="{Binding DirectorsVM.Name, UpdateSourceTrigger=PropertyChanged}"/>
-                        <TextBlock Style="{StaticResource ErrorTextStyle}"
-                                   Text="{Binding DirectorsVM.NameError}"
-                                   Visibility="{Binding DirectorsVM.HasNameError, Converter={StaticResource BoolToVisibility}}"/>
-
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,15,0,0">
-                            <Button Content="Add" Command="{Binding DirectorsVM.AddCommand}"
-                                    Style="{StaticResource ButtonStyle}" Width="70" Margin="3,0"/>
-                            <Button Content="Update" Command="{Binding DirectorsVM.UpdateCommand}"
-                                    Style="{StaticResource ButtonStyle}" Width="70" Margin="3,0"/>
-                            <Button Content="Delete" Command="{Binding DirectorsVM.DeleteCommand}"
-                                    Style="{StaticResource DeleteButtonStyle}" Width="70" Margin="3,0"/>
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-
-                <!-- Directors List -->
-                <DataGrid Grid.Row="2"
-                          ItemsSource="{Binding DirectorsVM.Directors}"
-                          SelectedItem="{Binding DirectorsVM.SelectedDirector}"
-                          AutoGenerateColumns="False"
-                          IsReadOnly="True"
-                          SelectionMode="Single"
-                          CanUserAddRows="False"
-                          GridLinesVisibility="None"
-                          AlternatingRowBackground="#F5F5F5"
-                          HeadersVisibility="Column">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
-                        <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
-                    </DataGrid.Columns>
-                </DataGrid>
-            </Grid>
-        </GroupBox>
+        </TabControl>
     </Grid>
 </Window>

@@ -1,7 +1,7 @@
-﻿using GrobelnyKasprzak.MovieCatalogue.Interfaces;
+using GrobelnyKasprzak.MovieCatalogue.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace GrobelnyKasprzak.MovieCatalogue.DAOMock;
+namespace GrobelnyKasprzak.MovieCatalogue.DAO.Mock;
 
 public class MockModule : IDaoModule
 {

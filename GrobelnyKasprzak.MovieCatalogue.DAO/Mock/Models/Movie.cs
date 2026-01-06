@@ -1,8 +1,8 @@
-﻿using GrobelnyKasprzak.MovieCatalogue.Core;
+using GrobelnyKasprzak.MovieCatalogue.Core;
 using GrobelnyKasprzak.MovieCatalogue.Interfaces;
 using System.ComponentModel.DataAnnotations;
 
-namespace GrobelnyKasprzak.MovieCatalogue.DAOMock.Models
+namespace GrobelnyKasprzak.MovieCatalogue.DAO.Mock.Models
 {
     public class Movie : IMovie
     {

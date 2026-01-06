@@ -7,19 +7,20 @@ internal class Program
     private static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-        var loader = new ReflectionLoader();
 
-        // Register data access object.
-        loader.Register(builder.Services);
+        // Register data access object
+        ReflectionLoader.RegisterDao(builder.Services, builder.Configuration);
 
         // Add services to the container.
         builder.Services.AddControllersWithViews();
         builder.Services.AddSingleton<ILookupService, LookupService>();
         builder.Services.AddScoped<IMovieService, MovieService>();
         builder.Services.AddScoped<IDirectorService, DirectorService>();
+
         builder.Services.AddAutoMapper(cfg =>
         {
-            cfg.AddMaps(AppDomain.CurrentDomain.GetAssemblies());
+            cfg.AddMaps(typeof(MovieService).Assembly);
+            cfg.AddMaps(typeof(Program).Assembly);
         });
 
 
