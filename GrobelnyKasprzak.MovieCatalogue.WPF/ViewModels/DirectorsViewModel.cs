@@ -1,10 +1,10 @@
 ﻿using GrobelnyKasprzak.MovieCatalogue.Interfaces;
 using GrobelnyKasprzak.MovieCatalogue.WPF.Commands;
-using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
+using System.ComponentModel.DataAnnotations;
 using System.Windows;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace GrobelnyKasprzak.MovieCatalogue.WPF.ViewModels
@@ -12,10 +12,11 @@ namespace GrobelnyKasprzak.MovieCatalogue.WPF.ViewModels
     public class DirectorsViewModel : ViewModel, IDataErrorInfo
     {
         private readonly IDirectorService _directorService;
-        private readonly IMovieService _movieService;
+        private readonly ICollectionView _directorsView;
         public ICommand UpdateCommand { get; }
         public ICommand CreateCommand { get; }
         public ICommand DeleteCommand { get; }
+
         private bool _editNameTouched;
         private bool _editYearTouched;
         private bool _newNameTouched;
@@ -24,7 +25,19 @@ namespace GrobelnyKasprzak.MovieCatalogue.WPF.ViewModels
         public static event Action? DirectorsChanged;
         public ObservableCollection<DirectorDto> Directors { get; }
 
-        // State
+        // State and search
+        private string _searchText = string.Empty;
+        public string SearchText
+        {
+            get => _searchText;
+            set
+            {
+                _searchText = value;
+                OnPropertyChanged();
+                _directorsView.Refresh();
+            }
+        }
+
         private int _selectedTabIndex;
         public int SelectedTabIndex
         {
@@ -35,6 +48,8 @@ namespace GrobelnyKasprzak.MovieCatalogue.WPF.ViewModels
                 OnPropertyChanged();
                 SelectedDirector = null;
                 ResetForms();
+                RefreshValidation();
+                CommandManager.InvalidateRequerySuggested();
             }
         }
 
@@ -46,6 +61,7 @@ namespace GrobelnyKasprzak.MovieCatalogue.WPF.ViewModels
             {
                 _selectedDirector = value;
                 OnPropertyChanged();
+
                 if (_selectedDirector != null)
                 {
                     EditName = _selectedDirector.Name;
@@ -58,6 +74,7 @@ namespace GrobelnyKasprzak.MovieCatalogue.WPF.ViewModels
                     EditName = string.Empty;
                     EditBirthYear = null;
                 }
+
                 CommandManager.InvalidateRequerySuggested();
             }
         }
@@ -67,14 +84,26 @@ namespace GrobelnyKasprzak.MovieCatalogue.WPF.ViewModels
         public string EditName
         {
             get => _editName;
-            set { _editName = value; _editNameTouched = true; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); }
+            set
+            {
+                _editName = value;
+                _editNameTouched = true;
+                OnPropertyChanged();
+                CommandManager.InvalidateRequerySuggested();
+            }
         }
 
         private int? _editBirthYear;
         public int? EditBirthYear
         {
             get => _editBirthYear;
-            set { _editBirthYear = value; _editYearTouched = true; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); }
+            set
+            {
+                _editBirthYear = value;
+                _editYearTouched = true;
+                OnPropertyChanged();
+                CommandManager.InvalidateRequerySuggested();
+            }
         }
 
         // Form (New)
@@ -82,37 +111,68 @@ namespace GrobelnyKasprzak.MovieCatalogue.WPF.ViewModels
         public string NewName
         {
             get => _newName;
-            set { _newName = value; _newNameTouched = true; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); }
+            set
+            {
+                _newName = value;
+                _newNameTouched = true;
+                OnPropertyChanged();
+                CommandManager.InvalidateRequerySuggested();
+            }
         }
 
         private int? _newBirthYear;
         public int? NewBirthYear
         {
             get => _newBirthYear;
-            set { _newBirthYear = value; _newYearTouched = true; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); }
+            set
+            {
+                _newBirthYear = value;
+                _newYearTouched = true;
+                OnPropertyChanged();
+                CommandManager.InvalidateRequerySuggested();
+            }
         }
 
         // Constructor
-        public DirectorsViewModel(IDirectorService directorService, IMovieService movieService)
+        public DirectorsViewModel(IDirectorService directorService)
         {
             _directorService = directorService;
-            _movieService = movieService;
-            Directors = new ObservableCollection<DirectorDto>(_directorService.GetAllDirectors().Select(d => new DirectorDto { Id = d.Id, Name = d.Name, BirthYear = d.BirthYear }));
+
+            Directors = new ObservableCollection<DirectorDto>();
+
+            _directorsView = CollectionViewSource.GetDefaultView(Directors);
+            _directorsView.Filter = FilterDirectors;
+
+            LoadDirectors();
 
             UpdateCommand = new RelayCommand(UpdateDirector, _ => SelectedDirector != null && IsEditValid);
             CreateCommand = new RelayCommand(CreateDirector, _ => IsNewValid);
-            DeleteCommand = new RelayCommand(DeleteDirector, _ => CanDelete);
+            DeleteCommand = new RelayCommand(DeleteDirector);
         }
 
         private void ResetForms()
         {
             _newNameTouched = _newYearTouched = _editNameTouched = _editYearTouched = false;
+
             NewName = string.Empty;
             NewBirthYear = null;
+
             EditName = string.Empty;
             EditBirthYear = null;
-            OnPropertyChanged(string.Empty);
         }
+
+        private bool FilterDirectors(object obj)
+        {
+            if (obj is not DirectorDto director)
+                return false;
+
+            // name filter
+            if (string.IsNullOrWhiteSpace(SearchText))
+                return true;
+
+            return director.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase);
+        }
+
 
         // CRUD
         private void CreateDirector(object? _)
@@ -122,21 +182,24 @@ namespace GrobelnyKasprzak.MovieCatalogue.WPF.ViewModels
                 var director = _directorService.CreateNewDirector();
                 director.Name = NewName;
                 director.BirthYear = NewBirthYear ?? 0;
+
                 _directorService.AddDirector(director);
-
-                int nextId = (Directors.Count > 0) ? Directors.Max(d => d.Id) + 1 : 1;
-                Directors.Add(new DirectorDto { Id = director.Id > 0 ? director.Id : nextId, Name = NewName, BirthYear = NewBirthYear!.Value });
-
+                LoadDirectors();
                 ResetForms();
+
                 DirectorsChanged?.Invoke();
                 MessageBox.Show("Director added successfully!");
             }
-            catch (Exception ex) { MessageBox.Show(ex.Message); }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         private void UpdateDirector(object? _)
         {
             if (SelectedDirector == null) return;
+
             try
             {
                 var director = _directorService.GetDirectorById(SelectedDirector.Id);
@@ -155,7 +218,10 @@ namespace GrobelnyKasprzak.MovieCatalogue.WPF.ViewModels
                     MessageBox.Show("Updated successfully!");
                 }
             }
-            catch (Exception ex) { MessageBox.Show(ex.Message); }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         private void DeleteDirector(object? _)
@@ -169,44 +235,74 @@ namespace GrobelnyKasprzak.MovieCatalogue.WPF.ViewModels
                 ResetForms();
                 DirectorsChanged?.Invoke();
             }
-            catch (Exception ex) { MessageBox.Show(ex.Message); }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
+        private void LoadDirectors()
+        {
+            Directors.Clear();
+
+            var directors = _directorService.GetAllDirectors();
+
+            foreach (var director in directors)
+            {
+                Directors.Add(new DirectorDto
+                {
+                    Id = director.Id,
+                    Name = director.Name,
+                    BirthYear = director.BirthYear
+                });
+            }
+
+            _directorsView.Refresh();
+        }
+
+
         // Validation
-        public bool IsEditValid => !string.IsNullOrWhiteSpace(EditName) && EditBirthYear >= 1850 && EditBirthYear <= 2026;
-        public bool IsNewValid => !string.IsNullOrWhiteSpace(NewName) && NewBirthYear >= 1850 && NewBirthYear <= 2026;
-        public bool CanDelete => SelectedDirector != null && !_movieService.GetAllMovies().Any(m => m.DirectorId == SelectedDirector.Id);
+        public bool IsEditValid =>
+            SelectedDirector != null &&
+            _directorService.ValidateName(EditName) == null &&
+            _directorService.ValidateBirthYear(EditBirthYear) == null;
+
+        public bool IsNewValid =>
+            _directorService.ValidateName(NewName) == null &&
+            _directorService.ValidateBirthYear(NewBirthYear) == null;
 
         public string Error => string.Empty;
         public string this[string columnName]
         {
             get
             {
+                ValidationResult? result = null;
+
+                // NEW
                 if (columnName == nameof(NewName))
                 {
                     if (!_newNameTouched) return string.Empty;
-                    if (string.IsNullOrWhiteSpace(NewName)) return "Surname is required.";
+                    result = _directorService.ValidateName(NewName);
                 }
-                if (columnName == nameof(NewBirthYear))
+                else if (columnName == nameof(NewBirthYear))
                 {
                     if (!_newYearTouched) return string.Empty;
-                    if (NewBirthYear == null) return "Year is required.";
-                    if (NewBirthYear < 1850 || NewBirthYear > 2026) return "Year must be 1850-2026.";
+                    result = _directorService.ValidateBirthYear(NewBirthYear);
                 }
 
-                if (columnName == nameof(EditName))
+                // EDIT
+                else if (columnName == nameof(EditName))
                 {
                     if (!_editNameTouched) return string.Empty;
-                    if (string.IsNullOrWhiteSpace(EditName)) return "Surname is required.";
+                    result = _directorService.ValidateName(EditName);
                 }
-                if (columnName == nameof(EditBirthYear))
+                else if (columnName == nameof(EditBirthYear))
                 {
                     if (!_editYearTouched) return string.Empty;
-                    if (EditBirthYear == null) return "Year is required.";
-                    if (EditBirthYear < 1850 || EditBirthYear > 2026) return "Year must be 1850-2026.";
+                    result = _directorService.ValidateBirthYear(EditBirthYear);
                 }
 
-                return string.Empty;
+                return result?.ErrorMessage ?? string.Empty;
             }
         }
     }

@@ -2,8 +2,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Runtime.Loader;
 
 namespace GrobelnyKasprzak.MovieCatalogue.Services
 {
@@ -19,19 +17,6 @@ namespace GrobelnyKasprzak.MovieCatalogue.Services
 
             if (!File.Exists(fullPath))
                 throw new FileNotFoundException($"Brak pliku: {fullPath}");
-
-            var resolver = new AssemblyDependencyResolver(fullPath);
-            AssemblyLoadContext.Default.Resolving += (context, assemblyName) =>
-            {
-                string? assemblyPath = resolver.ResolveAssemblyToPath(assemblyName);
-                return assemblyPath != null ? context.LoadFromAssemblyPath(assemblyPath) : null;
-            };
-
-            AssemblyLoadContext.Default.ResolvingUnmanagedDll += (managedAssembly, unmanagedDllName) =>
-            {
-                string? libraryPath = resolver.ResolveUnmanagedDllToPath(unmanagedDllName);
-                return libraryPath != null ? NativeLibrary.Load(libraryPath) : IntPtr.Zero;
-            };
 
             Assembly daoAssembly = Assembly.LoadFrom(fullPath);
             Type? moduleType = daoAssembly.GetType(className);

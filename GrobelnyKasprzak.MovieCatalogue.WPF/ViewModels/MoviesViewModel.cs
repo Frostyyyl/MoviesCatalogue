@@ -1,10 +1,10 @@
-﻿using GrobelnyKasprzak.MovieCatalogue.Interfaces;
+﻿using GrobelnyKasprzak.MovieCatalogue.Core;
+using GrobelnyKasprzak.MovieCatalogue.Interfaces;
 using GrobelnyKasprzak.MovieCatalogue.WPF.Commands;
 using GrobelnyKasprzak.MovieCatalogue.WPF.Models.Dto;
-using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
+using System.ComponentModel.DataAnnotations;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -25,6 +25,7 @@ namespace GrobelnyKasprzak.MovieCatalogue.WPF.ViewModels
         public ICommand DeleteCommand { get; }
         public ObservableCollection<MovieDto> Movies { get; }
         public ObservableCollection<DirectorDto> Directors { get; }
+        public static Array MovieGenres => Enum.GetValues<MovieGenre>();
 
         // State and search
         private string _searchText = string.Empty;
@@ -49,6 +50,8 @@ namespace GrobelnyKasprzak.MovieCatalogue.WPF.ViewModels
                 OnPropertyChanged();
                 SelectedMovie = null;
                 ResetForms();
+                RefreshValidation();
+                CommandManager.InvalidateRequerySuggested();
             }
         }
 
@@ -65,6 +68,7 @@ namespace GrobelnyKasprzak.MovieCatalogue.WPF.ViewModels
                     EditTitle = _selectedMovie.Title;
                     EditYear = _selectedMovie.Year;
                     EditDirectorId = _selectedMovie.DirectorId;
+                    EditGenre = _selectedMovie.Genre;
                     _editTitleTouched = false;
                     _editYearTouched = false;
                 }
@@ -82,6 +86,19 @@ namespace GrobelnyKasprzak.MovieCatalogue.WPF.ViewModels
         private int? _editDirectorId;
         public int? EditDirectorId { get => _editDirectorId; set { _editDirectorId = value; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); } }
 
+        private MovieGenre? _editGenre;
+        public MovieGenre? EditGenre
+        {
+            get => _editGenre;
+            set
+            {
+                _editGenre = value;
+                OnPropertyChanged();
+                CommandManager.InvalidateRequerySuggested();
+            }
+        }
+
+
         // Form (New)
         private string _newTitle = string.Empty;
         public string NewTitle { get => _newTitle; set { _newTitle = value; _newTitleTouched = true; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); } }
@@ -92,6 +109,17 @@ namespace GrobelnyKasprzak.MovieCatalogue.WPF.ViewModels
         private int? _newDirectorId;
         public int? NewDirectorId { get => _newDirectorId; set { _newDirectorId = value; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); } }
 
+        private MovieGenre? _newGenre;
+        public MovieGenre? NewGenre
+        {
+            get => _newGenre;
+            set
+            {
+                _newGenre = value;
+                OnPropertyChanged();
+                CommandManager.InvalidateRequerySuggested();
+            }
+        }
         // Constructor
         public MoviesViewModel(IMovieService movieService, IDirectorService directorService)
         {
@@ -126,13 +154,16 @@ namespace GrobelnyKasprzak.MovieCatalogue.WPF.ViewModels
         private void ResetForms()
         {
             _newTitleTouched = _newYearTouched = _editTitleTouched = _editYearTouched = false;
+
             NewTitle = string.Empty;
             NewYear = null;
             NewDirectorId = null;
+            NewGenre = null;
+
             EditTitle = string.Empty;
             EditYear = null;
             EditDirectorId = null;
-            OnPropertyChanged(string.Empty);
+            EditGenre = null;
         }
 
         private void RefreshDirectorsData()
@@ -150,6 +181,7 @@ namespace GrobelnyKasprzak.MovieCatalogue.WPF.ViewModels
                 Id = m.Id,
                 Title = m.Title,
                 Year = m.Year,
+                Genre = m.Genre,
                 DirectorId = m.DirectorId,
                 DirectorName = dict.TryGetValue(m.DirectorId, out var n) ? n : "Unknown"
             }).ToList();
@@ -166,6 +198,7 @@ namespace GrobelnyKasprzak.MovieCatalogue.WPF.ViewModels
                 movie.Title = NewTitle;
                 movie.Year = NewYear ?? 0;
                 movie.DirectorId = NewDirectorId ?? 0;
+                movie.Genre = NewGenre ?? default;
                 _movieService.AddMovie(movie);
 
                 RefreshMoviesData();
@@ -186,6 +219,7 @@ namespace GrobelnyKasprzak.MovieCatalogue.WPF.ViewModels
                     movie.Title = EditTitle;
                     movie.Year = EditYear ?? 0;
                     movie.DirectorId = EditDirectorId ?? 0;
+                    movie.Genre = EditGenre ?? default;
                     _movieService.UpdateMovie(movie);
                     RefreshMoviesData();
                     MessageBox.Show("Updated successfully!");
@@ -208,38 +242,68 @@ namespace GrobelnyKasprzak.MovieCatalogue.WPF.ViewModels
         }
 
         // Validation
-        public bool IsEditValid => !string.IsNullOrWhiteSpace(EditTitle) && EditYear >= 1850 && EditYear <= 2026 && EditDirectorId > 0;
-        public bool IsNewValid => !string.IsNullOrWhiteSpace(NewTitle) && NewYear >= 1850 && NewYear <= 2026 && NewDirectorId > 0;
+        public bool IsNewValid =>
+            _movieService.ValidateTitle(NewTitle) == null &&
+            _movieService.ValidateYear(NewYear) == null &&
+            _movieService.ValidateDirector(NewDirectorId) == null &&
+            _movieService.ValidateGenre(NewGenre) == null;
+
+        public bool IsEditValid =>
+            SelectedMovie != null &&
+            _movieService.ValidateTitle(EditTitle) == null &&
+            _movieService.ValidateYear(EditYear) == null &&
+            _movieService.ValidateDirector(EditDirectorId) == null &&
+            _movieService.ValidateGenre(EditGenre) == null;
+
 
         public string Error => string.Empty;
         public string this[string columnName]
         {
             get
             {
+                ValidationResult? result = null;
+
+                // NEW
                 if (columnName == nameof(NewTitle))
                 {
                     if (!_newTitleTouched) return string.Empty;
-                    if (string.IsNullOrWhiteSpace(NewTitle)) return "Title is required.";
+                    result = _movieService.ValidateTitle(NewTitle);
                 }
-                if (columnName == nameof(NewYear))
+                else if (columnName == nameof(NewYear))
                 {
                     if (!_newYearTouched) return string.Empty;
-                    if (NewYear == null) return "Year is required.";
-                    if (NewYear < 1850 || NewYear > 2026) return "Year must be 1850-2026.";
+                    result = _movieService.ValidateYear(NewYear);
+                }
+                else if (columnName == nameof(NewDirectorId))
+                {
+                    result = _movieService.ValidateDirector(NewDirectorId);
+                }
+                else if (columnName == nameof(NewGenre))
+                {
+                    result = _movieService.ValidateGenre(NewGenre);
                 }
 
-                if (columnName == nameof(EditTitle))
+                // EDIT
+                else if (columnName == nameof(EditTitle))
                 {
                     if (!_editTitleTouched) return string.Empty;
-                    if (string.IsNullOrWhiteSpace(EditTitle)) return "Title is required.";
+                    result = _movieService.ValidateTitle(EditTitle);
                 }
-                if (columnName == nameof(EditYear))
+                else if (columnName == nameof(EditYear))
                 {
                     if (!_editYearTouched) return string.Empty;
-                    if (EditYear == null) return "Year is required.";
-                    if (EditYear < 1850 || EditYear > 2026) return "Year must be 1850-2026.";
+                    result = _movieService.ValidateYear(EditYear);
                 }
-                return string.Empty;
+                else if (columnName == nameof(EditDirectorId))
+                {
+                    result = _movieService.ValidateDirector(EditDirectorId);
+                }
+                else if (columnName == nameof(EditGenre))
+                {
+                    result = _movieService.ValidateGenre(EditGenre);
+                }
+
+                return result?.ErrorMessage ?? string.Empty;
             }
         }
     }

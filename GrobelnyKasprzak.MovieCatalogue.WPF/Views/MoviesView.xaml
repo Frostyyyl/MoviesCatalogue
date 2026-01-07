@@ -165,7 +165,8 @@
                             <GridView>
                                 <GridViewColumn Header="Title" Width="180" DisplayMemberBinding="{Binding Title}" />
                                 <GridViewColumn Header="Year" Width="60" DisplayMemberBinding="{Binding Year}" />
-                                <GridViewColumn Header="Director" Width="140" DisplayMemberBinding="{Binding DirectorName}" />
+                                <GridViewColumn Header="Genre" Width="120" DisplayMemberBinding="{Binding Genre}" />
+                                <GridViewColumn Header="Director" Width="200" DisplayMemberBinding="{Binding DirectorName}" />
                             </GridView>
                         </ListView.View>
                     </ListView>
@@ -183,6 +184,12 @@
 
                         <Label Content="Release Year:" Margin="0,15,0,0" Foreground="{StaticResource DarkTextBrush}" FontWeight="SemiBold"/>
                         <TextBox Text="{Binding EditYear, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
+
+                        <Label Content="Genre:" Margin="0,15,0,0" Foreground="{StaticResource DarkTextBrush}" FontWeight="SemiBold"/>
+                        <ComboBox ItemsSource="{Binding MovieGenres}" 
+                                SelectedValue="{Binding EditGenre}" 
+                                SelectedValuePath="."/>
+
 
                         <Label Content="Director:" Margin="0,15,0,0" Foreground="{StaticResource DarkTextBrush}" FontWeight="SemiBold"/>
                         <ComboBox ItemsSource="{Binding Directors}" 
@@ -206,6 +213,12 @@
 
                         <Label Content="Release Year:" Margin="0,15,0,0" Foreground="{StaticResource DarkTextBrush}" FontWeight="SemiBold"/>
                         <TextBox Text="{Binding NewYear, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
+                        
+                        <Label Content="Genre:" Margin="0,15,0,0" Foreground="{StaticResource DarkTextBrush}" FontWeight="SemiBold"/>
+                        <ComboBox ItemsSource="{Binding MovieGenres}" 
+                              SelectedValue="{Binding NewGenre}" 
+                              SelectedValuePath="."/>
+
 
                         <Label Content="Director:" Margin="0,15,0,0" Foreground="{StaticResource DarkTextBrush}" FontWeight="SemiBold"/>
                         <ComboBox ItemsSource="{Binding Directors}" 

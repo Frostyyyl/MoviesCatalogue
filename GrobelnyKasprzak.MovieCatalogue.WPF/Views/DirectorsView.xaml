@@ -156,18 +156,28 @@
                 <ColumnDefinition Width="1*" />
             </Grid.ColumnDefinitions>
 
+            <DockPanel Grid.Column="0">
+                <StackPanel DockPanel.Dock="Top"  Margin="0,0,0,10">
+                <Label Content="Search directors:"
+                Foreground="Gray"
+                FontSize="11"/>
+
+                        <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                    Margin="0,0,0,5"/>
+                </StackPanel>
             <Border Grid.Column="0" BorderBrush="{StaticResource LightBorderBrush}" BorderThickness="1" Background="White" CornerRadius="4">
                 <ListView ItemsSource="{Binding Directors}" 
                           SelectedItem="{Binding SelectedDirector}" 
                           BorderThickness="0" Margin="2">
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Header="Surname" Width="160" DisplayMemberBinding="{Binding Name}" />
+                            <GridViewColumn Header="Surname" Width="260" DisplayMemberBinding="{Binding Name}" />
                             <GridViewColumn Header="Year" Width="80" DisplayMemberBinding="{Binding BirthYear}" />
                         </GridView>
                     </ListView.View>
                 </ListView>
             </Border>
+            </DockPanel>
 
             <TabControl Grid.Column="1" Margin="20,0,0,0" SelectedIndex="{Binding SelectedTabIndex}" BorderThickness="0" Background="Transparent">
 
