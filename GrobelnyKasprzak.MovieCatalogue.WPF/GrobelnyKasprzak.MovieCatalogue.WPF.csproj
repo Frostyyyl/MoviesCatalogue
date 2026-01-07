@@ -17,7 +17,7 @@
 
 	<Target Name="CopyCustomDLLs" AfterTargets="Build">
 		<ItemGroup>
-			<MyFiles Include="..\GrobelnyKasprzak.MovieCatalogue.DAO\bin\$(Configuration)\net9.0-windows\GrobelnyKasprzak.MovieCatalogue.DAO.dll" />
+			<MyFiles Include="..\GrobelnyKasprzak.MovieCatalogue.DAO\bin\$(Configuration)\net9.0\GrobelnyKasprzak.MovieCatalogue.DAO.dll" />
 		</ItemGroup>
 		<Copy SourceFiles="@(MyFiles)" DestinationFolder="$(OutputPath)" />
 	</Target>

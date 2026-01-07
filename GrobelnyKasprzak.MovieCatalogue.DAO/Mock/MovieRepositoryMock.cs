@@ -70,7 +70,7 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAO.Mock
             _movies.Remove((Movie)movie);
         }
 
-        public bool Exists(string? title = null, int? year = null, MovieGenre? genre = null, int? directorId = null, int? excludeId = null)
+        public bool Exists(int? excludeId = null, string? title = null, int? year = null, MovieGenre? genre = null, int? directorId = null)
         {
             return _movies.Any(m =>
                 (excludeId == null || m.Id != excludeId) &&

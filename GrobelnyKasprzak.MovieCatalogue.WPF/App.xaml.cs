@@ -3,14 +3,13 @@ using GrobelnyKasprzak.MovieCatalogue.Services;
 using GrobelnyKasprzak.MovieCatalogue.WPF.ViewModels;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
 using System.Windows;
 
 namespace GrobelnyKasprzak.MovieCatalogue.WPF
 {
     public partial class App : Application
     {
-        public static ServiceProvider Services { get; private set; }
+        public static ServiceProvider? Services { get; private set; }
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -42,7 +41,7 @@ namespace GrobelnyKasprzak.MovieCatalogue.WPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Błąd startu aplikacji: {ex.Message}\n\n{ex.StackTrace}", 
+                MessageBox.Show($"Błąd startu aplikacji: {ex.Message}\n\n{ex.StackTrace}",
                     "Błąd krytyczny", MessageBoxButton.OK, MessageBoxImage.Error);
                 Shutdown();
             }

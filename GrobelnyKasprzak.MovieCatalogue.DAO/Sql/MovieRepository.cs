@@ -67,7 +67,7 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAO.Sql
             var context = new ValidationContext(movie);
             Validator.ValidateObject(movie, context, validateAllProperties: true);
         }
-        public bool Exists(string? title = null, int? year = null, MovieGenre? genre = null, int? directorId = null, int? excludeId = null)
+        public bool Exists(int? excludeId = null, string? title = null, int? year = null, MovieGenre? genre = null, int? directorId = null)
         {
             var query = _db.Movies.AsQueryable();
 

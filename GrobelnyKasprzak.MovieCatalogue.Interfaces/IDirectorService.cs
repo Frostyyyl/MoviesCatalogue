@@ -1,7 +1,10 @@
-﻿namespace GrobelnyKasprzak.MovieCatalogue.Interfaces;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace GrobelnyKasprzak.MovieCatalogue.Interfaces;
 
 public interface IDirectorService
 {
+    ValidationResult? ValidateDirector(string? name, int? birthYear, int? id = null);
     IEnumerable<IDirector> GetAllDirectors();
     IDirector? GetDirectorById(int id);
     void AddDirector(IDirector director);

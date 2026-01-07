@@ -1,4 +1,5 @@
 ﻿using GrobelnyKasprzak.MovieCatalogue.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
 namespace GrobelnyKasprzak.MovieCatalogue.Services
 {
@@ -13,22 +14,42 @@ namespace GrobelnyKasprzak.MovieCatalogue.Services
 
         public IMovie? GetMovieById(int id) => _repo.GetById(id);
 
+        public ValidationResult? ValidateMovie(string? title, int? year, int? directorId, int? id = null)
+        {
+            if (string.IsNullOrWhiteSpace(title))
+                return new ValidationResult("Title is required.");
+
+            if (year == null)
+                return new ValidationResult("Year is required.");
+            else if (year < 1888 || year > DateTime.Now.Year)
+                return new ValidationResult("Year must be 1888–current.");
+
+            if (directorId == null || directorId <= 0)
+                return new ValidationResult("Please select a Director.");
+
+            var duplicate = _repo.Exists(title: title, year: year.Value, directorId: directorId.Value, excludeId: id);
+            if (duplicate)
+                return new ValidationResult($"This movie already exists for this director in the year {year}.");
+
+            return null;
+        }
+
         public void AddMovie(IMovie movie)
         {
-            if (_repo.Exists(title: movie.Title, year: movie.Year, directorId: movie.DirectorId))
-            {
-                throw new InvalidOperationException($"This movie already exists for this director in the year {movie.Year}.");
-            }
+            ValidationResult? result = ValidateMovie(movie.Title, movie.Year, movie.DirectorId, movie.Id);
+
+            if (result != null)
+                throw new InvalidOperationException(result.ErrorMessage);
 
             _repo.Add(movie);
         }
 
         public void UpdateMovie(IMovie movie)
         {
-            if (_repo.Exists(title: movie.Title, year: movie.Year, directorId: movie.DirectorId, excludeId: movie.Id))
-            {
-                throw new InvalidOperationException($"This movie already exists for this director in the year {movie.Year}.");
-            }
+            ValidationResult? result = ValidateMovie(movie.Title, movie.Year, movie.DirectorId, movie.Id);
+
+            if (result != null)
+                throw new InvalidOperationException(result.ErrorMessage);
 
             _repo.Update(movie);
 

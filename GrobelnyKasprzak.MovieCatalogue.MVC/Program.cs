@@ -19,8 +19,7 @@ internal class Program
 
         builder.Services.AddAutoMapper(cfg =>
         {
-            cfg.AddMaps(typeof(MovieService).Assembly);
-            cfg.AddMaps(typeof(Program).Assembly);
+            cfg.AddMaps(AppDomain.CurrentDomain.GetAssemblies());
         });
 
 

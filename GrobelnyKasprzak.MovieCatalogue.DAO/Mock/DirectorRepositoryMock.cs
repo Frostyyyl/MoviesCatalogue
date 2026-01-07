@@ -66,11 +66,12 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAO.Mock
             _directors.Remove((Director)director);
         }
 
-        public bool Exists(string? name = null, int? birthYear = null)
+        public bool Exists(int? excludeId = null, string? name = null, int? birthYear = null)
         {
             return _directors.Any(m =>
                 (name == null || m.Name == name) &&
-                (birthYear == null || m.BirthYear == birthYear)
+                (birthYear == null || m.BirthYear == birthYear) &&
+                (excludeId == null || m.Id != excludeId)
             );
         }
 

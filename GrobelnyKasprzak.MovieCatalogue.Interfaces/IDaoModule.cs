@@ -4,5 +4,5 @@ namespace GrobelnyKasprzak.MovieCatalogue.Interfaces;
 
 public interface IDaoModule
 {
-    void RegisterServices(IServiceCollection services);
+    void Register(IServiceCollection services);
 }

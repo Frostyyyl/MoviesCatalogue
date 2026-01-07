@@ -8,6 +8,6 @@
         void Update(IDirector director);
         void Delete(int id);
         IDirector CreateNew();
-        bool Exists(string? name = null, int? birthYear = null);
+        bool Exists(int? excludeId = null, string? name = null, int? birthYear = null);
     }
 }

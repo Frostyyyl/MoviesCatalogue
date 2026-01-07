@@ -1,7 +1,6 @@
 ﻿using GrobelnyKasprzak.MovieCatalogue.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Loader;
@@ -41,7 +40,7 @@ namespace GrobelnyKasprzak.MovieCatalogue.Services
                 throw new Exception($"Klasa {className} nie implementuje IDaoModule.");
 
             var instance = Activator.CreateInstance(moduleType) as IDaoModule;
-            instance?.RegisterServices(services);
+            instance?.Register(services);
         }
     }
 }

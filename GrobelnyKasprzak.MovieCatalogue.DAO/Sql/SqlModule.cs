@@ -5,7 +5,7 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAO.Sql;
 
 public class SqlModule : IDaoModule
 {
-    public void RegisterServices(IServiceCollection services)
+    public void Register(IServiceCollection services)
     {
         services.AddDbContext<MovieCatalogueContext>();
         services.AddScoped<IMovieRepository, MovieRepository>();

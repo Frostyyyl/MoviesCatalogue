@@ -53,7 +53,7 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAO.Sql
             return new Director { BirthYear = DateTime.Now.Year };
         }
 
-        public bool Exists(string? name = null, int? birthYear = null)
+        public bool Exists(int? excludeId = null, string? name = null, int? birthYear = null)
         {
             var query = _db.Directors.AsQueryable();
 
@@ -62,6 +62,9 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAO.Sql
 
             if (birthYear.HasValue)
                 query = query.Where(d => d.BirthYear == birthYear.Value);
+
+            if (excludeId.HasValue)
+                query = query.Where(d => d.Id == excludeId.Value);
 
             return query.Any();
         }
