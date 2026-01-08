@@ -8,10 +8,13 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAO.Mock
     {
         private static readonly List<Director> _directors =
         [
-            new Director { Id = 1, Name = "Lana & Lilly Wachowski", BirthYear = 1988 },
-            new Director { Id = 2, Name = "Andrew Adamson", BirthYear = 1987 },
-            new Director { Id = 3, Name = "Quentin Tarantino", BirthYear = 1991 },
-            new Director { Id = 4, Name = "Christopher Nolan", BirthYear = 1972 }
+            new Director { Id = 1, Name = "Lana & Lilly Wachowski", BirthYear = 1968 },
+            new Director { Id = 2, Name = "Andrew Adamson", BirthYear = 1966 },
+            new Director { Id = 3, Name = "Quentin Tarantino", BirthYear = 1963 },
+            new Director { Id = 4, Name = "Christopher Nolan", BirthYear = 1970 },
+            new Director { Id = 5, Name = "Sergio Leone", BirthYear = 1929 },
+            new Director { Id = 6, Name = "Stanley Kubrick", BirthYear = 1928 },
+            new Director { Id = 7, Name = "David Lynch", BirthYear = 1946 },
         ];
 
         public IEnumerable<IDirector> GetAll()

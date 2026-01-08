@@ -10,7 +10,12 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAO.Mock
         private static readonly List<Movie> _movies =
         [
             new Movie { Id = 1, Title = "Matrix", Year = 1999, Genre = MovieGenre.SciFi, DirectorId = 1 },
-            new Movie { Id = 2, Title = "Shrek", Year = 2001, Genre = MovieGenre.Animation, DirectorId = 2 }
+            new Movie { Id = 2, Title = "Shrek", Year = 2001, Genre = MovieGenre.Animation, DirectorId = 2 },
+            new Movie { Id = 3, Title = "Inception", Year = 2010, Genre = MovieGenre.SciFi, DirectorId = 3 },
+            new Movie { Id = 4, Title = "The Godfather", Year = 1972, Genre = MovieGenre.Drama, DirectorId = 4 },
+            new Movie { Id = 5, Title = "Pulp Fiction", Year = 1994, Genre = MovieGenre.Crime, DirectorId = 5 },
+            new Movie { Id = 6, Title = "The Dark Knight", Year = 2008, Genre = MovieGenre.Action, DirectorId = 3 },
+            new Movie { Id = 7, Title = "Interstellar", Year = 2014, Genre = MovieGenre.SciFi, DirectorId = 3 }
         ];
 
         public IEnumerable<IMovie> GetAll()

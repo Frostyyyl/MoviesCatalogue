@@ -135,7 +135,14 @@ namespace GrobelnyKasprzak.MovieCatalogue.WPF.ViewModels
             RefreshDirectorsData();
             RefreshMoviesData();
 
-            DirectorsViewModel.DirectorsChanged += () => Application.Current.Dispatcher.Invoke(RefreshDirectorsData);
+            DirectorsViewModel.DirectorsChanged += () =>
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    RefreshDirectorsData();
+                    RefreshMoviesData();
+                });
+            };
 
             UpdateCommand = new RelayCommand(UpdateMovie, _ => SelectedMovie != null && IsEditValid);
             CreateCommand = new RelayCommand(CreateMovie, _ => IsNewValid);
