@@ -15,16 +15,25 @@ namespace GrobelnyKasprzak.MovieCatalogue.DAO.Sql
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
-            string folder = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "MovieCatalogueSqlDatabase"
-            );
-            Directory.CreateDirectory(folder);
+            string baseDir = AppContext.BaseDirectory;
+            DirectoryInfo? dir = new(baseDir);
 
-            string path = Path.Combine(folder, "movies.db");
+            while (dir != null && dir.GetFiles("*.sln").Length == 0)
+            {
+                dir = dir.Parent;
+            }
 
-            options.UseSqlite($"Data Source={path}");
+            if (dir == null)
+                throw new Exception("Solution directory not found.");
+
+            // Create a solution-level folder for the database
+            string dbFolder = Path.Combine(dir.FullName, "Database");
+            Directory.CreateDirectory(dbFolder);
+            string dbPath = Path.Combine(dbFolder, "movies.db");
+
+            options.UseSqlite($"Data Source={dbPath}");
         }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
